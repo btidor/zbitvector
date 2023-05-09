@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zbitvector"
+version = "1.0b1"
+description = "A well-typed library for symbolic bitvectors"
+readme = "README.md"
