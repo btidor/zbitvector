@@ -12,5 +12,8 @@
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
-    "python.linting.pydocstyleEnabled": true
+    "python.linting.pydocstyleEnabled": true,
+    "python.linting.pydocstyleArgs": [
+        "--match='(?!setup.py).*\\.py'",
+    ]
 }
