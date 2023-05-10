@@ -1,7 +1,7 @@
-name: Build and deploy documentation
-on: [push, workflow_dispatch]
+name: documentation
+on: [push, pull_request, workflow_dispatch]
 concurrency:
-  group: "pages"
+  group: documentation
   cancel-in-progress: false
 
 jobs:
