@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools", "cython"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "zbitvector"
 version = "1.0b1"
@@ -10,4 +6,26 @@ readme = "README.md"
 
 # zbitvector is MIT-licensed. However, the binary wheel packages Bitwuzla and
 # its dependencies, which include GMP (LGPLv3) and SymFPU (GPLv3).
-license = {text = "GNU General Public License v3"}
+license = { text = "GNU General Public License v3" }
+
+requires-python = ">=3.8"
+
+[build-system]
+requires = ["setuptools", "cython"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pybitwuzla"]
+
+[tool.cibuildwheel]
+# For now, build images for Linux on 64-bit Intel. We use manylinux_2_28, the
+# most recent supported image, because it gives us GMP v6.1+. It's compatible
+# with distros released in ~2018+, see:
+#
+# https://github.com/mayeut/pep600_compliance
+#
+build = ["*manylinux_x86_64"]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-pypy_x86_64-image = "manylinux_2_28"
+
+before-all = ["make libbitwuzla"]
