@@ -1,0 +1,16 @@
+--- bitwuzla_api.pxd	2023-05-12 19:34:04.869958109 +0000
++++ bitwuzla_api.pxd	2023-05-12 19:34:23.529869817 +0000
+@@ -24,12 +24,7 @@
+     void pybitwuzla_abort_fun(const char* msg)
+     const char * pybitwuzla_get_err_msg()
+
+-cdef extern from "pybitwuzla_utils.h":
+-    void pybitwuzla_delete(Bitwuzla *bitwuzla)
+-    void pybitwuzla_set_term(
+-            Bitwuzla *bitwuzla, PyObject *fun, PyObject *state)
+-
+-cdef extern from "bitwuzla.h":
++cdef extern from "bitwuzla/bitwuzla.h":
+     ctypedef struct BitwuzlaTerm:
+         pass
+     ctypedef struct Bitwuzla:

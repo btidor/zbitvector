@@ -1,2 +1,3 @@
 pybitwuzla/**       linguist-generated
 pybitwuzla/Makefile -linguist-generated
+pybitwuzla/*.diff   -linguist-generated

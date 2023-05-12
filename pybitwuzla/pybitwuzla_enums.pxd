@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-cdef extern from "bitwuzla.h":
+cdef extern from "bitwuzla/bitwuzla.h":
 
     cdef enum BitwuzlaBVBase:
         BITWUZLA_BV_BASE_BIN,

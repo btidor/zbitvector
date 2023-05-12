@@ -1,6 +1,7 @@
-TARGETS = pybitwuzla_abort.cpp \
+TARGETS = bitwuzla_api.pxd \
+	pybitwuzla_abort.cpp \
+	pybitwuzla_abort.h \
 	pybitwuzla_enums.pxd \
-	pybitwuzla_utils.c \
 	pybitwuzla.pyx
 
 CHECKOUT=/opt/bitwuzla
@@ -20,8 +21,9 @@ clean:
 pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/c/bitwuzla.h
 	python3 $^ $@
 	sed -i '1 i\# $(HEADER)\n' $@
+	patch < pybitwuzla_enums.diff
 
-%.c: $(CHECKOUT)/src/api/python/%.c
+%.h: $(CHECKOUT)/src/api/python/%.h
 	cp $< $@
 	sed -i '1 i\// $(HEADER)\n' $@
 
@@ -29,6 +31,12 @@ pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/
 	cp $< $@
 	sed -i '1 i\// $(HEADER)\n' $@
 
-%.pyx: $(CHECKOUT)/src/api/python/%.pyx
+%.pxd: $(CHECKOUT)/src/api/python/%.pxd %.diff
 	cp $< $@
 	sed -i '1 i\# $(HEADER)\n' $@
+	patch < $(word 2,$^)
+
+%.pyx: $(CHECKOUT)/src/api/python/%.pyx %.diff
+	cp $< $@
+	sed -i '1 i\# $(HEADER)\n' $@
+	patch < $(word 2,$^)

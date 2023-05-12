@@ -481,67 +481,10 @@ cdef class Bitwuzla:
 
     def __dealloc__(self):
         if self._c_bitwuzla is not NULL:
-            bitwuzla_api.pybitwuzla_delete(self._c_bitwuzla)
+            bitwuzla_api.bitwuzla_delete(self._c_bitwuzla)
 
     cdef bitwuzla_api.Bitwuzla* ptr(self):
         return self._c_bitwuzla
-
-    # ------------------------------------------------------------------------
-    # Termination callback
-    # ------------------------------------------------------------------------
-
-    def set_term(self, fun, args):
-        """set_term(fun, args)
-
-           Set a termination callback function.
-
-           Use this function to force Bitwuzla to prematurely terminate if
-           callback function ``fun`` returns True. Arguments ``args`` to
-           ``fun`` may be passed as a single Python object (in case that
-           ``fun`` takes only one argument), a tuple, or a list of arguments.
-
-           E.g., ::
-
-             import time
-
-             def fun1 (arg):
-                 # timeout after 1 sec.
-                 return time.time() - arg > 1.0
-
-             def fun2 (arg0, arg1):
-                 # do something and return True/False
-                 ...
-
-             bitwuzla = Bitwuzla()
-
-             bitwuzla.set_term(fun1, time.time())
-             bitwuzla.set_term(fun1, (time.time(),))
-             bitwuzla.set_term(fun1, [time.time()])
-
-             bitwuzla.set_term(fun2, (arg0, arg1))
-             bitwuzla.set_term(run2, [arg0, arg1])
-
-           :param fun: A python function.
-           :param args: A function argument or a list or tuple of function
-                        arguments.
-        """
-        cdef PyObject* funptr = <PyObject*>fun
-        cdef PyObject* argsptr = <PyObject*>args
-        bitwuzla_api.pybitwuzla_set_term(self.ptr(), funptr, argsptr)
-
-    def terminate(self):
-        """Call terminate callback that was set via
-           :func:`~pybitwuzla.Bitwuzla.set_term`.
-
-           :return: True if termination condition is fulfilled, else False.
-           :rtype: bool
-
-           .. seealso::
-                :func:`~pybitwuzla.Bitwuzla.set_term`.
-        """
-        cdef int32_t res
-        res = bitwuzla_api.bitwuzla_terminate(self.ptr())
-        return res > 0
 
     # ------------------------------------------------------------------------
     # Bitwuzla API functions (general)
