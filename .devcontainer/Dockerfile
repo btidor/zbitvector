@@ -4,8 +4,11 @@ RUN apt update && apt -y upgrade
 RUN apt -y install python3-pip python3-venv
 
 # Bitwuzla & dependencies
-RUN pip install cython && \
-    apt -y install build-essential cmake libgmp-dev
+RUN apt -y install autoconf build-essential cmake
+RUN curl https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz | tar xJC /opt && \
+	cd /opt/gmp-6.2.1 && \
+    ./configure --enable-cxx --enable-fat && \
+    make && make check && make install
 RUN git clone https://github.com/bitwuzla/bitwuzla /opt/bitwuzla && \
     cd /opt/bitwuzla && \
     git checkout 1230d80a5275ddf525da9c218c2bcd29c3130e49 && \

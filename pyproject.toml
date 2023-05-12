@@ -19,11 +19,8 @@ packages = ["pybitwuzla"]
 
 [tool.cibuildwheel]
 # For now, build images for Linux on 64-bit Intel. We use manylinux_2_28, the
-# most recent supported image, because it gives us GMP v6.1+. It's compatible
-# with distros released in ~2018+, see:
-#
-# https://github.com/mayeut/pep600_compliance
-#
+# most recent supported image, which is compatible with distros released in
+# ~2018+ (https://github.com/mayeut/pep600_compliance).
 build = ["*manylinux_x86_64"]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-pypy_x86_64-image = "manylinux_2_28"
