@@ -12,22 +12,12 @@
 
 #include "pybitwuzla_abort.h"
 
-#include <string>
-
-class BitwuzlaException : public std::exception
-{
- public:
-  BitwuzlaException(const char* msg) : msg(msg) {}
-  const char* what() const noexcept override { return msg.c_str(); }
-
- protected:
-  std::string msg;
-};
+#include <stdexcept>
 
 void
 pybitwuzla_abort_fun(const char* msg)
 {
-  throw BitwuzlaException(msg);
+  throw std::runtime_error(msg);
 }
 
 const char*
@@ -37,7 +27,7 @@ pybitwuzla_get_err_msg()
   {
     throw;
   }
-  catch (const BitwuzlaException& e)
+  catch (const std::runtime_error& e)
   {
     return e.what();
   }

@@ -27,9 +27,10 @@ pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/
 	cp $< $@
 	sed -i '1 i\// $(HEADER)\n' $@
 
-%.cpp: $(CHECKOUT)/src/api/python/%.cpp
+%.cpp: $(CHECKOUT)/src/api/python/%.cpp %.diff
 	cp $< $@
 	sed -i '1 i\// $(HEADER)\n' $@
+	patch < $(word 2,$^)
 
 %.pxd: $(CHECKOUT)/src/api/python/%.pxd %.diff
 	cp $< $@
