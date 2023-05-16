@@ -36,3 +36,7 @@ $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 		./contrib/setup-symfpu.sh && \
 		./configure.sh --shared
 	cd $(DEPDIR)/bitwuzla/build && make && make install
+
+pybitwuzla.pyi:
+	pybitwuzla/stubs.py > $@
+	black $@
