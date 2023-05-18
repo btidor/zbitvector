@@ -59,13 +59,13 @@ class Bitwuzla:
         """:return: The copyright information.
         :rtype: str"""
         ...
-    def dump_formula(self) -> str:
+    def dump_formula(self, fmt: str) -> str:
         """dump_formula(fmt = "smt2")
 
         Dump the current formula as a string in format ``fmt``.
 
         :param fmt: Model format. Available formats: "btor", "smt2"
-        :type: str
+        :type fmt: str
 
         :return: String representation of formula in format ``fmt``.
         :rtype: str"""
@@ -77,13 +77,13 @@ class Bitwuzla:
         .. seealso::
              :func:`~pybitwuzla.Bitwuzla.assume_formula`."""
         ...
-    def get_model(self) -> str:
+    def get_model(self, fmt: str) -> str:
         """get_model(fmt = "smt2")
 
         Get the model as a string in format ``fmt``.
 
         :param fmt: Model format. Available formats: "btor", "smt2"
-        :type: str
+        :type fmt: str
 
         :return: String representation of model in format ``fmt``.
         :rtype: str"""
@@ -438,7 +438,10 @@ class Bitwuzla:
         :rtype: BitwuzlaTerm"""
         ...
     def mk_term(
-        self, kind: Kind, terms: list[BitwuzlaTerm], indices: list[int]
+        self,
+        kind: Kind,
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm],
+        indices: list[int] | tuple[int],
     ) -> BitwuzlaTerm:
         """mk_term(kind, terms, indices = None)
 
@@ -447,9 +450,9 @@ class Bitwuzla:
         :param kind: The operator kind.
         :type kind: Kind
         :param terms: The number of argument terms.
-        :type terms: list(BitwuzlaTerm)
+        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
         :param indices: The argument terms.
-        :type indices: list(int)
+        :type indices: list(int) or tuple(int)
 
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
@@ -538,7 +541,9 @@ class Bitwuzla:
             simplifies the input formula as a preprocessing step."""
         ...
     def substitute(
-        self, terms: list[BitwuzlaTerm], subst_map: dict[BitwuzlaTerm, BitwuzlaTerm]
+        self,
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm] | BitwuzlaTerm,
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
     ) -> list[BitwuzlaTerm]:
         """substitute(terms, subst_map)
 
@@ -546,7 +551,7 @@ class Bitwuzla:
         substitutions in ``subst_map``.
 
         :param terms: List of terms to apply substitutions.
-        :type terms: list(BitwuzlaTerm)
+        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm) or BitwuzlaTerm
         :param subst_map: The substitution map mapping constants or
                           variables to terms.
         :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)
@@ -632,13 +637,13 @@ class BitwuzlaSort:
         ...
 
 class BitwuzlaTerm:
-    def dump(self) -> str:
+    def dump(self, fmt: str) -> str:
         """dump(fmt = "smt2")
 
         Get string representation of term in format ``fmt``.
 
         :param fmt: Output format. Available formats: "btor", "smt2"
-        :type: str
+        :type fmt: str
 
         :return: String representation of the term in format ``fmt``.
         :rtype: str"""

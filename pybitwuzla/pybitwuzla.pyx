@@ -252,7 +252,7 @@ cdef class BitwuzlaTerm:
            Get string representation of term in format ``fmt``.
 
            :param fmt: Output format. Available formats: "btor", "smt2"
-           :type: str
+           :type fmt: str
 
            :return: String representation of the term in format ``fmt``.
            :rtype: str
@@ -723,7 +723,7 @@ cdef class Bitwuzla:
            Get the model as a string in format ``fmt``.
 
            :param fmt: Model format. Available formats: "btor", "smt2"
-           :type: str
+           :type fmt: str
 
            :return: String representation of model in format ``fmt``.
            :rtype: str
@@ -742,7 +742,7 @@ cdef class Bitwuzla:
            Dump the current formula as a string in format ``fmt``.
 
            :param fmt: Model format. Available formats: "btor", "smt2"
-           :type: str
+           :type fmt: str
 
            :return: String representation of formula in format ``fmt``.
            :rtype: str
@@ -1341,9 +1341,9 @@ cdef class Bitwuzla:
            :param kind: The operator kind.
            :type kind: Kind
            :param terms: The number of argument terms.
-           :type terms: list(BitwuzlaTerm)
+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
            :param indices: The argument terms.
-           :type indices: list(int)
+           :type indices: list(int) or tuple(int)
 
            :return: A term representing an operation of given kind.
            :rtype: BitwuzlaTerm
@@ -1393,7 +1393,7 @@ cdef class Bitwuzla:
            substitutions in ``subst_map``.
 
            :param terms: List of terms to apply substitutions.
-           :type terms: list(BitwuzlaTerm)
+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm) or BitwuzlaTerm
            :param subst_map: The substitution map mapping constants or
                              variables to terms.
            :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)
