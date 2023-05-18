@@ -62,7 +62,7 @@
 </p>
 
 {%- if pagename != "search" and builder != "singlehtml" %}
-<div id="searchbox" style="display: none; margin-top: 20px;" role="search">
+<div id="searchbox" role="search">
     <div class="searchformwrapper">
         <form class="search" action="{{ pathto('search') }}" method="get">
             <input type="text" name="q" placeholder="Quick search..." aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
@@ -72,3 +72,9 @@
 </div>
 <script>document.getElementById('searchbox').style.display = "block"</script>
 {%- endif %}
+
+<hr />
+
+<div id="localtoc">
+{{ toc }}
+</div>

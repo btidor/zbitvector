@@ -9,3 +9,8 @@ div.body h2 {
 div.body h3, div.body h4, div.body h5 {
     font-size: 100%;
 }
+
+#searchbox {
+    display: none; /* removed by js */
+    margin: 20px 0 20px 0;
+}
