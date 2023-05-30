@@ -1,6 +1,5 @@
 [project]
 name = "zbitvector"
-version = "1.0b1"
 description = "A well-typed library for symbolic bitvectors"
 readme = "README.md"
 
@@ -8,15 +7,22 @@ readme = "README.md"
 # its dependencies, which include GMP (LGPLv3) and SymFPU (GPLv3).
 license = { text = "GNU General Public License v3" }
 
-requires-python = ">=3.8"
+dynamic = ["version"]
+
+requires-python = ">= 3.8"
 dependencies = ["typing-extensions >= 4.0"]
 
 [build-system]
-requires = ["setuptools", "cython"]
+requires = ["setuptools", "setuptools_scm[toml]", "cython"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["zbitvector", "zbitvector.pybitwuzla"]
+
+[tool.setuptools_scm]
+
+[tool.cibuildwheel.macos]
+before-all = ["sudo make ci"]
 
 [tool.cibuildwheel.linux]
 # For now, build images for Linux on 64-bit Intel. We use manylinux_2_28, the
@@ -26,9 +32,6 @@ build = ["*_x86_64"]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-pypy_x86_64-image = "manylinux_2_28"
 before-all = ["make ci"]
-
-[tool.cibuildwheel.macos]
-before-all = ["sudo make ci"]
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
