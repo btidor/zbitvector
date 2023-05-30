@@ -1,3 +1,3 @@
-# pyright: reportUnusedImport=false
-from .bitvector import Int, Uint
-from .constraint import Constraint
+from .bitvector import Int as Int
+from .bitvector import Uint as Uint
+from .constraint import Constraint as Constraint

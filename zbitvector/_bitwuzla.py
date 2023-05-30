@@ -1,10 +1,10 @@
-# pyright: reportUnusedImport=false
-
 import typing
 
 try:
     from . import pybitwuzla
-    from .pybitwuzla import BitwuzlaTerm, Kind, Option
+    from .pybitwuzla import BitwuzlaTerm as BitwuzlaTerm
+    from .pybitwuzla import Kind as Kind
+    from .pybitwuzla import Option as Option
 except ImportError:
     # In development, the import above will fail because pybitwuzla hasn't been
     # compiled. Fall back to the global pybitwuzla module (but don't tell the
