@@ -6,16 +6,20 @@ theory of fixed-sized bitvectors and arrays (QF_BVA).
 
 ::
 
-    from zbitvector import BitVector
+    import zbitvector
 
-    Uint8  = BitVector.subclass(8)
-    Uint64 = BitVector.subclass(64)
+    class Uint8(zbitvector.Uint):
+        width = 8
+
+    class Uint64(zbitvector.Uint):
+        width = 64
 
     Uint64("A") + Uint64(1)
     # => Uint64(`(bvadd A #x01)`)
 
     Uint64("A") + Uint8(1)
     # fails to typecheck
+
 
 Installation
 ============
@@ -29,7 +33,3 @@ To build from source instead, first `build Bitwuzla`_ using :code:`./configure
 --shared` and install the library by running :code:`make install`.
 
 .. _build Bitwuzla: https://github.com/bitwuzla/bitwuzla#readme
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
