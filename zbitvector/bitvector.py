@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from typing_extensions import Self
+from typing_extensions import Self, assert_never
 
 from ._bitwuzla import Kind, ctx
 from .constraint import Constraint
@@ -12,11 +12,12 @@ from .symbolic import Symbolic
 class BitVector(Symbolic):
     def __init__(self, value: int | str) -> None:
         sort = ctx.bzla.mk_bv_sort(cast(Any, self).width)
-        match value:
-            case str():
-                term = ctx.bzla.mk_const(sort, value)
-            case int():
-                term = ctx.bzla.mk_bv_value(sort, value)
+        if isinstance(value, str):
+            term = ctx.bzla.mk_const(sort, value)
+        elif isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
+            term = ctx.bzla.mk_bv_value(sort, value)
+        else:
+            assert_never(value)
         super().__init__(term)
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
