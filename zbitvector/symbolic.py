@@ -27,7 +27,7 @@ class Symbolic(abc.ABC):
         return self
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}.TODO"
+        return f"{self.__class__.__name__}(`{self.smtlib()}`)"
 
     def smtlib(self) -> str:
         return self._term.dump("smt2")

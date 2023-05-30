@@ -22,6 +22,10 @@ class BitVector(Symbolic):
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self
     ) -> Constraint:
+        """
+        >>> Uint8(1) == Uint8(3)
+        Constraint(`false`)
+        """
         return Constraint.from_expr(Kind.EQUAL, self._term, other._term)
 
     def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]

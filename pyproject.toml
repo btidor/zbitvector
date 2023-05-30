@@ -29,3 +29,6 @@ before-all = ["make ci"]
 
 [tool.cibuildwheel.macos]
 before-all = ["sudo make ci"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
