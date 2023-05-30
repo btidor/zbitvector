@@ -1,0 +1,17 @@
+# Dependencies
+typing_extensions
+
+# Linters
+black
+pydocstyle
+
+# Toolchain
+build
+twine
+wheel
+
+# Testing
+pytest
+
+# Documentation
+sphinx

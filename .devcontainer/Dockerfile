@@ -20,9 +20,3 @@ RUN git clone https://github.com/bitwuzla/bitwuzla /opt/bitwuzla && \
     cd build && make && make install && \
     mv /usr/local/lib/pybitwuzla.so /usr/lib/python3/dist-packages/ && \
     ldconfig
-
-# Linters
-RUN pip install black pydocstyle
-
-# Packaging toolchain
-RUN pip install build twine wheel
