@@ -1,10 +1,6 @@
 #!/usr/bin/env pytest
 
-from .bitvector import Uint
-
-
-class Uint8(Uint):
-    width = 8
+from . import Uint8
 
 
 def test_add():

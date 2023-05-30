@@ -2,11 +2,7 @@ from typing import Any
 
 import pytest
 
-import zbitvector
-
-
-class Uint8(zbitvector.Uint):
-    width = 8
+from . import Uint8
 
 
 @pytest.fixture(autouse=True)
