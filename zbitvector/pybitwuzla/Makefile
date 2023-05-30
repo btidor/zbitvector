@@ -10,18 +10,26 @@ REVFILE = $(CHECKOUT)/.git/HEAD
 HEADER = Generated from https://github.com/bitwuzla/bitwuzla \
 	at $(shell cat $(REVFILE) | cut -c 1-7)
 
-.PHONY: all clean
+.PHONY: all clean stubs ../pybitwuzla.pyi
 .EXTRA_PREREQS:= $(abspath $(lastword $(MAKEFILE_LIST))) $(REVFILE)
 
 all: $(TARGETS)
 
 clean:
 	-rm $(TARGETS)
+	-rm ../pybitwuzla.pyi
+
+stubs: ../pybitwuzla.pyi
 
 pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/c/bitwuzla.h
 	python3 $^ $@
 	sed -i '1 i\# $(HEADER)\n' $@
 	patch < pybitwuzla_enums.diff
+
+../pybitwuzla.pyi: stubs.py
+	python3 $< > $@
+	sed -i '1 i\# $(HEADER)\n' $@
+	black $@
 
 %.h: $(CHECKOUT)/src/api/python/%.h
 	cp $< $@

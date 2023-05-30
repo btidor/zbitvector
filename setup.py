@@ -7,8 +7,8 @@ setup(
         Extension(
             "zbitvector.pybitwuzla",
             sources=[
-                "pybitwuzla/pybitwuzla.pyx",
-                "pybitwuzla/pybitwuzla_abort.cpp",
+                "zbitvector/pybitwuzla/pybitwuzla.pyx",
+                "zbitvector/pybitwuzla/pybitwuzla_abort.cpp",
             ],
             libraries=["bitwuzla"],
             extra_compile_args=["-O3"],

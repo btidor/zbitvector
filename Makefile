@@ -2,7 +2,7 @@ DEPDIR = /opt
 INCLUDE = /usr/local/include
 REVISION = 1230d80a5275ddf525da9c218c2bcd29c3130e49
 
-.PHONY: all build clean ci pybitwuzla.pyi
+.PHONY: all build clean ci
 
 all: build
 
@@ -36,7 +36,3 @@ $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 		./contrib/setup-symfpu.sh && \
 		./configure.sh --shared
 	cd $(DEPDIR)/bitwuzla/build && make && make install
-
-pybitwuzla.pyi:
-	pybitwuzla/stubs.py > $@
-	black $@

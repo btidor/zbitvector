@@ -1,3 +1,6 @@
-include pybitwuzla/**
-exclude pybitwuzla/Makefile
-exclude pybitwuzla/*.diff
+include zbitvector/py.typed
+include zbitvector/pybitwuzla.pyi
+include zbitvector/pybitwuzla/*.cpp
+include zbitvector/pybitwuzla/*.h
+include zbitvector/pybitwuzla/*.pxd
+include zbitvector/pybitwuzla/*.pyx

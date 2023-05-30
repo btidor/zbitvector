@@ -15,7 +15,7 @@ requires = ["setuptools", "cython"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["pybitwuzla"]
+packages = ["zbitvector"]
 
 [tool.cibuildwheel.linux]
 # For now, build images for Linux on 64-bit Intel. We use manylinux_2_28, the

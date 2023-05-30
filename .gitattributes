@@ -1,3 +1,5 @@
-pybitwuzla/**       linguist-generated
-pybitwuzla/Makefile -linguist-generated
-pybitwuzla/*.diff   -linguist-generated
+zbitvector/pybitwuzla.pyi       linguist-generated
+zbitvector/pybitwuzla/*.cpp     linguist-generated
+zbitvector/pybitwuzla/*.h       linguist-generated
+zbitvector/pybitwuzla/*.pxd     linguist-generated
+zbitvector/pybitwuzla/*.pyx     linguist-generated

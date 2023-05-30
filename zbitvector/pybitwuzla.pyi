@@ -1,3 +1,5 @@
+# Generated from https://github.com/bitwuzla/bitwuzla at 1230d80
+
 from __future__ import annotations
 
 from enum import Enum
