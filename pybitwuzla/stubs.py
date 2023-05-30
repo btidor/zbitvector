@@ -27,7 +27,7 @@ print()
 for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
     if not inspect.isclass(topic):
         continue
-    if inspect.getmodule(topic) != pybitwuzla:
+    if inspect.getmodule(topic) != pybitwuzla: # type: ignore
         continue
 
     if issubclass(topic, enum.Enum):

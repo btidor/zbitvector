@@ -4,8 +4,8 @@
 
 2. Correct errors in the type annotations.
 
---- pybitwuzla.pyx	2023-05-18 17:54:32.654008384 +0000
-+++ pybitwuzla.pyx	2023-05-18 17:56:30.756323235 +0000
+--- pybitwuzla.pyx	2023-05-30 14:56:50.011212115 +0000
++++ pybitwuzla.pyx	2023-05-30 14:56:53.791196724 +0000
 @@ -252,7 +252,7 @@
             Get string representation of term in format ``fmt``.
 
@@ -104,7 +104,15 @@
 
             :return: String representation of formula in format ``fmt``.
             :rtype: str
-@@ -1398,9 +1341,9 @@
+@@ -919,6 +862,7 @@
+            :param opt:   Option.
+            :type opt:    BitwuzlaOption
+            :param value: Option value.
++           :type value:  str or BitwuzlaOption
+
+            .. seealso::
+                 For a list of available options see :class:`~pybitwuzla.Option`
+@@ -1398,9 +1342,9 @@
             :param kind: The operator kind.
             :type kind: Kind
             :param terms: The number of argument terms.
@@ -116,7 +124,7 @@
 
             :return: A term representing an operation of given kind.
             :rtype: BitwuzlaTerm
-@@ -1450,7 +1393,7 @@
+@@ -1450,7 +1394,7 @@
             substitutions in ``subst_map``.
 
             :param terms: List of terms to apply substitutions.

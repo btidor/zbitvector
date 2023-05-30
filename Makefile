@@ -2,7 +2,7 @@ DEPDIR = /opt
 INCLUDE = /usr/local/include
 REVISION = 1230d80a5275ddf525da9c218c2bcd29c3130e49
 
-.PHONY: all build clean ci
+.PHONY: all build clean ci pybitwuzla.pyi
 
 all: build
 
