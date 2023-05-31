@@ -19,7 +19,7 @@ $(INCLUDE)/gmp.h:
 	curl https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz | tar xJC $(DEPDIR)
 	cd $(DEPDIR)/gmp-6.2.1 && \
 		./configure --enable-cxx --enable-fat && \
-		make && make check && make install
+		make -j 4 && make check -j 4 && make install
 
 $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 	-rm -r $(DEPDIR)/bitwuzla $(REVISION).zip
@@ -35,4 +35,4 @@ $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 		./contrib/setup-btor2tools.sh && \
 		./contrib/setup-symfpu.sh && \
 		./configure.sh --shared
-	cd $(DEPDIR)/bitwuzla/build && make && make install
+	cd $(DEPDIR)/bitwuzla/build && make -j 4 && make install

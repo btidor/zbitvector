@@ -1,0 +1,39 @@
+package_task:
+  matrix:
+    - name: "package / manylinux-x86-64"
+      compute_engine_instance: &BUILDER_TEMPLATE
+        image_project: cirrus-images
+        image: family/docker-builder
+        platform: linux
+        cpu: 4
+        memory: 2G
+      env:
+        CIBW_BUILD: "*manylinux*"
+    - name: "package / musllinux-x86-64"
+      compute_engine_instance:
+        <<: *BUILDER_TEMPLATE
+      env:
+        CIBW_BUILD: "*musllinux*"
+    - name: "package / manylinux-aarch64"
+      compute_engine_instance:
+        <<: *BUILDER_TEMPLATE
+        image: family/docker-builder-arm64
+        architecture: arm64
+      env:
+        CIBW_BUILD: "*manylinux*"
+    - name: "package / musllinux-aarch64"
+      compute_engine_instance:
+        <<: *BUILDER_TEMPLATE
+        image: family/docker-builder-arm64
+        architecture: arm64
+      env:
+        CIBW_BUILD: "*musllinux*"
+    - name: "package / macosx"
+      macos_instance:
+        image: ghcr.io/cirruslabs/macos-monterey-xcode
+  setup_script:
+    - python3 -m pip install cibuildwheel==2.13.0
+  build_script:
+    - python3 -m cibuildwheel
+  wheels_artifacts:
+    path: "wheelhouse/*"
