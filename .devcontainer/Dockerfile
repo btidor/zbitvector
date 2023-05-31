@@ -18,7 +18,7 @@ RUN pip install --upgrade cython
 RUN curl https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz | tar xJC /opt
 WORKDIR /opt/gmp-6.2.1
 RUN ./configure --enable-cxx --enable-fat
-RUN make && make check && make install
+RUN make -j4 && make -j4 check && make install
 
 # Bitwuzla
 RUN git clone https://github.com/bitwuzla/bitwuzla /opt/bitwuzla
@@ -30,6 +30,6 @@ RUN ./contrib/setup-symfpu.sh
 RUN ./configure.sh --python
 
 WORKDIR /opt/bitwuzla/build
-RUN make && make install
+RUN make -j4 && make install
 RUN mv /usr/local/lib/pybitwuzla.so /usr/lib/python3/dist-packages/
 RUN ldconfig
