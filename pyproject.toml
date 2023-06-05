@@ -18,7 +18,11 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 before-all = ["make ci"]
-test-command = 'python3 -c "import zbitvector; Uint8 = type(\"Uint8\", (zbitvector.Uint,), {\"width\": 8}); print(Uint8(1) + Uint8(2))"'
+test-requires = "pytest"
+test-command = """\
+    pytest --import-mode=append {project}/tests && \
+    pytest --pyargs --doctest-modules zbitvector\
+"""
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"

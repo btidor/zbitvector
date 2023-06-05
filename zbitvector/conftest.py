@@ -2,7 +2,11 @@ from typing import Any, Dict
 
 import pytest
 
-from . import Uint8
+from . import bitvector
+
+
+class Uint8(bitvector.Uint):
+    width = 8
 
 
 @pytest.fixture(autouse=True)
