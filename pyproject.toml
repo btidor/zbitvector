@@ -13,21 +13,17 @@ requires-python = ">= 3.8"
 dependencies = ["typing-extensions >= 4.0"]
 
 [build-system]
-requires = ["setuptools", "setuptools_scm[toml]", "cython"]
+requires = ["cython", "setuptools", "setuptools_scm[toml]"]
 build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel]
+before-all = ["make ci"]
+test-command = 'python3 -c "import zbitvector; Uint8 = type(\"Uint8\", (zbitvector.Uint,), {\"width\": 8}); print(Uint8(1) + Uint8(2))"'
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
 
 [tool.setuptools]
 packages = ["zbitvector", "zbitvector.pybitwuzla"]
 
 [tool.setuptools_scm]
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
-before-all = ["sudo make ci"]
-
-[tool.cibuildwheel.linux]
-archs = ["auto64"]
-before-all = ["make ci"]
-
-[tool.pytest.ini_options]
-addopts = "--doctest-modules"
