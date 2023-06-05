@@ -15,7 +15,7 @@ class Symbolic(abc.ABC):
 
     @classmethod
     def from_expr(cls, kind: Kind, *terms: BitwuzlaTerm) -> Self:
-        term = ctx.bzla.mk_term(kind, terms, [])
+        term = ctx.bzla.mk_term(kind, terms)
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result

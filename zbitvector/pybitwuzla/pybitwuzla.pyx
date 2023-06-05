@@ -20,9 +20,7 @@ from libc.stdio cimport stdout, FILE, fopen, fclose
 from libc.stdint cimport int32_t, uint32_t, uint64_t
 from libcpp cimport bool as cbool
 from cpython.ref cimport PyObject
-from cpython cimport array
 from collections import defaultdict
-import array
 import math, os, sys
 import tempfile
 
@@ -1334,8 +1332,8 @@ cdef class Bitwuzla:
                                                      sort.ptr(),
                                                      _to_cstr(symbol)))
 
-    def mk_term(self, kind, terms, indices = None):
-        """mk_term(kind, terms, indices = None)
+    def mk_term(self, kind, terms):
+        """mk_term(kind, terms)
 
            Create a term of given kind with the given argument terms.
 
@@ -1343,8 +1341,6 @@ cdef class Bitwuzla:
            :type kind: Kind
            :param terms: The number of argument terms.
            :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
-           :param indices: The argument terms.
-           :type indices: list(int) or tuple(int)
 
            :return: A term representing an operation of given kind.
            :rtype: BitwuzlaTerm
@@ -1353,10 +1349,6 @@ cdef class Bitwuzla:
             raise ValueError('Given kind is not a Kind object.')
         if not isinstance(terms, list) and not isinstance(terms, tuple):
             raise ValueError('Expected list or tuple for terms')
-        if indices is not None \
-            and not isinstance(indices, list) \
-            and not isinstance(indices, tuple):
-            raise ValueError('Expected list or tuple for indices')
 
         num_terms = len(terms)
         cdef const bitwuzla_api.BitwuzlaTerm **c_terms =\
@@ -1369,20 +1361,8 @@ cdef class Bitwuzla:
             c_terms[i] = (<BitwuzlaTerm> terms[i]).ptr()
 
         term = BitwuzlaTerm(self)
-
-        cdef array.array c_indices
-        if indices:
-            c_indices = array.array('I', indices)
-            term.set(bitwuzla_api.bitwuzla_mk_term_indexed(
-                            self.ptr(),
-                            kind.value,
-                            num_terms,
-                            c_terms,
-                            len(indices),
-                            c_indices.data.as_uints))
-        else:
-            term.set(bitwuzla_api.bitwuzla_mk_term(
-                        self.ptr(), kind.value, num_terms, c_terms))
+        term.set(bitwuzla_api.bitwuzla_mk_term(
+                    self.ptr(), kind.value, num_terms, c_terms))
         free(c_terms)
         return term
 

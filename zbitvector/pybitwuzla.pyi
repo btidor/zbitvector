@@ -440,12 +440,9 @@ class Bitwuzla:
         :rtype: BitwuzlaTerm"""
         ...
     def mk_term(
-        self,
-        kind: Kind,
-        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm],
-        indices: list[int] | tuple[int],
+        self, kind: Kind, terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm]
     ) -> BitwuzlaTerm:
-        """mk_term(kind, terms, indices = None)
+        """mk_term(kind, terms)
 
         Create a term of given kind with the given argument terms.
 
@@ -453,8 +450,6 @@ class Bitwuzla:
         :type kind: Kind
         :param terms: The number of argument terms.
         :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
-        :param indices: The argument terms.
-        :type indices: list(int) or tuple(int)
 
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
