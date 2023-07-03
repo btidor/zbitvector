@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Final, Generic, TypeVar, get_args
 
 from typing_extensions import Self, assert_never
 
@@ -8,10 +8,40 @@ from ._bitwuzla import Kind, ctx
 from .constraint import Constraint
 from .symbolic import Symbolic
 
+N = TypeVar("N", bound=int)
 
-class BitVector(Symbolic):
+
+class BitVector(Symbolic, Generic[N]):
+    _width: Final[int] = 0
+
+    def __class_getitem__(cls, key: TypeVar) -> type[Self]:
+        args = get_args(key)
+        if len(args) == 0:
+            return cls
+        elif len(args) == 1 and isinstance(args[0], int):
+            if args[0] <= 0:
+                raise TypeError(f"{cls.__name__} requires a positive width.")
+
+            def construct(value: int | str) -> Self:
+                # Create and initialize a new Int/Uint, with one customization:
+                # we manually specify the instance's _width attribute before
+                # calling __init__.
+                instance = cls.__new__(cls)
+                instance._width = args[0]  # pyright: ignore[reportGeneralTypeIssues]
+                instance.__init__(value)
+                return instance
+
+            return construct  # type: ignore
+        else:
+            raise TypeError(f"Unknown type parameter passed to {cls.__name__}[...].")
+
     def __init__(self, value: int | str) -> None:
-        sort = ctx.bzla.mk_bv_sort(cast(Any, self).width)
+        if self._width == 0:
+            raise TypeError(
+                f"Cannot instantiate {self.__class__.__name__} directly; "
+                f"use {self.__class__.__name__}[N](...) instead."
+            )
+        sort = ctx.bzla.mk_bv_sort(self._width)
         if isinstance(value, str):
             term = ctx.bzla.mk_const(sort, value)
         elif isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
@@ -47,14 +77,7 @@ class BitVector(Symbolic):
         return self.from_expr(Kind.BV_SHL, self._term, other._term)
 
 
-class Uint(BitVector):
-    def __init_subclass__(cls) -> None:
-        if "width" not in dir(cls):
-            raise AttributeError(f"subclass of Uint must define a 'width' attribute")
-        width = cast(Any, cls).width
-        if not isinstance(width, int):
-            raise TypeError(f"expected Uint width to be an int, got: {repr(width)}")
-
+class Uint(BitVector[N]):
     def __lt__(self: Self, other: Self) -> Constraint:
         return Constraint.from_expr(Kind.BV_ULT, self._term, other._term)
 
@@ -83,14 +106,7 @@ class Uint(BitVector):
         return self.from_expr(Kind.BV_NOT, self._term)
 
 
-class Int(BitVector):
-    def __init_subclass__(cls) -> None:
-        if "width" not in dir(cls):
-            raise AttributeError(f"subclass of Int must define a 'width' attribute")
-        width = cast(Any, cls).width
-        if not isinstance(width, int):
-            raise TypeError(f"expected Int width to be an int, got: {repr(width)}")
-
+class Int(BitVector[N]):
     def __lt__(self: Self, other: Self) -> Constraint:
         return Constraint.from_expr(Kind.BV_SLT, self._term, other._term)
 

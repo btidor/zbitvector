@@ -3,13 +3,11 @@ solvers. It can be used to represent and manipulate symbolic expressions in the
 theory of fixed-sized bitvectors and arrays (QF_BVA).
 
 ```py
+import typing
 import zbitvector
 
-class Uint8(zbitvector.Uint):
-    width = 8
-
-class Uint64(zbitvector.Uint):
-    width = 64
+Uint8 = zbitvector.Uint[typing.Literal[8]]
+Uint64 = zbitvector.Uint[typing.Literal[64]]
 
 Uint64("A") + Uint64(1)
 # => Uint64(`(bvadd A #x01)`)

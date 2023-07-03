@@ -1,12 +1,12 @@
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 
 import pytest
+from typing_extensions import TypeAlias
 
 from . import bitvector
 
-
-class Uint8(bitvector.Uint):
-    width = 8
+Uint8: TypeAlias = bitvector.Uint[Literal[8]]
+Uint64: TypeAlias = bitvector.Uint[Literal[64]]
 
 
 @pytest.fixture(autouse=True)
