@@ -56,7 +56,7 @@ class Constraint(Symbolic):
         if isinstance(value, str):
             term = ctx.bzla.mk_const(ctx.bool_sort, value)
         elif isinstance(value, bool):  # pyright: ignore[reportUnnecessaryIsInstance]
-            term = ctx.bzla.mk_bv_value(ctx.bool_sort, value)
+            term = ctx.bzla.mk_bv_value(ctx.bool_sort, int(value))
         else:
             assert_never(value)
         super().__init__(term)
@@ -170,7 +170,7 @@ class BitVector(Symbolic, Generic[N]):
         return self._from_expr(Kind.BV_MUL, self, other)
 
     @abc.abstractmethod
-    def __floordiv__(self, other: Self, /) -> Self:
+    def __truediv__(self, other: Self, /) -> Self:
         ...
 
     @abc.abstractmethod
@@ -192,7 +192,7 @@ class Uint(BitVector[N]):
     def __le__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_ULE, self, other)
 
-    def __floordiv__(self, other: Self, /) -> Self:
+    def __truediv__(self, other: Self, /) -> Self:
         return self._from_expr(Kind.BV_UDIV, self, other)
 
     def __mod__(self, other: Self, /) -> Self:
@@ -209,7 +209,7 @@ class Int(BitVector[N]):
     def __le__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_SLE, self, other)
 
-    def __floordiv__(self, other: Self, /) -> Self:
+    def __truediv__(self, other: Self, /) -> Self:
         return self._from_expr(Kind.BV_SDIV, self, other)
 
     def __mod__(self, other: Self, /) -> Self:
