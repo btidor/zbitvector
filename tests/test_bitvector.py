@@ -5,8 +5,7 @@ import typing
 import pytest
 
 import zbitvector
-
-from . import Uint8
+from zbitvector.conftest import Uint8
 
 
 def test_add():
