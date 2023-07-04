@@ -19,6 +19,12 @@ theory of fixed-sized bitvectors and arrays (QF_BVA).
     # fails to typecheck
 
 
+.. toctree::
+    :maxdepth: 2
+
+    api
+
+
 Installation
 ============
 
