@@ -3,12 +3,16 @@ from typing import Any, Dict, Literal
 import pytest
 from typing_extensions import TypeAlias
 
-from . import bitvector
+from . import Int, Uint
 
-Uint8: TypeAlias = bitvector.Uint[Literal[8]]
-Uint64: TypeAlias = bitvector.Uint[Literal[64]]
+Uint8: TypeAlias = Uint[Literal[8]]
+Uint64: TypeAlias = Uint[Literal[64]]
+
+Int8: TypeAlias = Int[Literal[8]]
+Int64: TypeAlias = Int[Literal[64]]
 
 
 @pytest.fixture(autouse=True)
 def setup_doctest(doctest_namespace: Dict[str, Any]) -> None:
     doctest_namespace["Uint8"] = Uint8
+    doctest_namespace["Int8"] = Int8

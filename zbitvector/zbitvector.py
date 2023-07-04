@@ -1,12 +1,59 @@
 from __future__ import annotations
 
+import abc
 from typing import Final, Generic, TypeVar, get_args
 
 from typing_extensions import Self, assert_never
 
-from ._bitwuzla import Kind, ctx
-from .constraint import Constraint
-from .symbolic import Symbolic
+from ._bitwuzla import BitwuzlaTerm, Kind, ctx
+
+
+class Symbolic(abc.ABC):
+    _term: Final[BitwuzlaTerm]
+
+    @abc.abstractmethod
+    def __init__(self, term: BitwuzlaTerm) -> None:
+        self._term = term
+
+    @classmethod
+    def from_expr(cls, kind: Kind, *terms: BitwuzlaTerm) -> Self:
+        term = ctx.bzla.mk_term(kind, terms)
+        result = cls.__new__(cls)
+        Symbolic.__init__(result, term)
+        return result
+
+    def __copy__(self) -> Self:
+        return self
+
+    def __deepcopy__(self) -> Self:
+        return self
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(`{self.smtlib()}`)"
+
+    def smtlib(self) -> str:
+        return self._term.dump("smt2")
+
+
+S = TypeVar("S", bound=Symbolic)
+
+
+class Constraint(Symbolic):
+    def __init__(self, value: bool | str):
+        if isinstance(value, str):
+            term = ctx.bzla.mk_const(ctx.bool_sort, value)
+        elif isinstance(value, bool):  # pyright: ignore[reportUnnecessaryIsInstance]
+            term = ctx.bzla.mk_bv_value(ctx.bool_sort, value)
+        else:
+            assert_never(value)
+        super().__init__(term)
+
+    def __invert__(self) -> Constraint:
+        return self.from_expr(Kind.NOT, self._term)
+
+    def ite(self, then: S, else_: S) -> S:
+        return then.from_expr(Kind.ITE, self._term, then._term, else_._term)
+
 
 N = TypeVar("N", bound=int)
 

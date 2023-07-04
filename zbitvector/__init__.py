@@ -2,13 +2,14 @@
 
 from importlib import metadata
 
-from .bitvector import BitVector as BitVector
-from .bitvector import Int as Int
-from .bitvector import Uint as Uint
-from .constraint import Constraint as Constraint
-from .symbolic import Symbolic as Symbolic
-
 try:
     __version__ = metadata.version(__name__)
 except metadata.PackageNotFoundError:
     __version__ = "dev"
+
+
+from .zbitvector import BitVector as BitVector
+from .zbitvector import Constraint as Constraint
+from .zbitvector import Int as Int
+from .zbitvector import Symbolic as Symbolic
+from .zbitvector import Uint as Uint
