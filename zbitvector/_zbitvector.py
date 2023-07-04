@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import abc
-from typing import Final, Generic, TypeVar, get_args
+from typing import Final, Generic, TypeVar, get_args, overload
 
 from typing_extensions import Self, assert_never, override
 
 from ._bitwuzla import BitwuzlaTerm, Kind, ctx
+
+N = TypeVar("N", bound=int)
 
 
 class Symbolic(abc.ABC):
@@ -48,21 +50,6 @@ class Symbolic(abc.ABC):
     ) -> Constraint:
         return Constraint._from_expr(Kind.DISTINCT, self, other)
 
-    def __invert__(self) -> Self:
-        return self._from_expr(Kind.BV_NOT, self)
-
-    def __and__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_AND, self, other)
-
-    def __or__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_OR, self, other)
-
-    def __xor__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_XOR, self, other)
-
-
-S = TypeVar("S", bound=Symbolic)
-
 
 class Constraint(Symbolic):
     def __init__(self, value: bool | str, /):
@@ -74,11 +61,32 @@ class Constraint(Symbolic):
             assert_never(value)
         super().__init__(term)
 
-    def ite(self, then: S, else_: S, /) -> S:
+    def __invert__(self) -> Self:
+        return self._from_expr(Kind.NOT, self)
+
+    def __and__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.AND, self, other)
+
+    def __or__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.OR, self, other)
+
+    def __xor__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.XOR, self, other)
+
+    @overload
+    def ite(self, then: Uint[N], else_: Uint[N]) -> Uint[N]:
+        ...
+
+    @overload
+    def ite(self, then: Int[N], else_: Int[N]) -> Int[N]:
+        ...
+
+    @overload
+    def ite(self, then: Constraint, else_: Constraint) -> Constraint:
+        ...
+
+    def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
         return then._from_expr(Kind.ITE, self, then, else_)
-
-
-N = TypeVar("N", bound=int)
 
 
 class BitVector(Symbolic, Generic[N]):
@@ -139,6 +147,18 @@ class BitVector(Symbolic, Generic[N]):
     @abc.abstractmethod
     def __le__(self, other: Self, /) -> Constraint:
         ...
+
+    def __invert__(self) -> Self:
+        return self._from_expr(Kind.BV_NOT, self)
+
+    def __and__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.BV_AND, self, other)
+
+    def __or__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.BV_OR, self, other)
+
+    def __xor__(self, other: Self, /) -> Self:
+        return self._from_expr(Kind.BV_XOR, self, other)
 
     def __add__(self, other: Self, /) -> Self:
         return self._from_expr(Kind.BV_ADD, self, other)

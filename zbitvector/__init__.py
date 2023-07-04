@@ -8,8 +8,8 @@ except metadata.PackageNotFoundError:
     __version__ = "dev"
 
 
-from .zbitvector import BitVector as BitVector
-from .zbitvector import Constraint as Constraint
-from .zbitvector import Int as Int
-from .zbitvector import Symbolic as Symbolic
-from .zbitvector import Uint as Uint
+from ._zbitvector import BitVector as BitVector
+from ._zbitvector import Constraint as Constraint
+from ._zbitvector import Int as Int
+from ._zbitvector import Symbolic as Symbolic
+from ._zbitvector import Uint as Uint
