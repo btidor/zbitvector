@@ -1,13 +1,16 @@
 div.body h1 {
     font-size: 150%;
+    padding-top: 0.8em;
 }
 
 div.body h2 {
-    font-size: 130%;
+    font-size: 140%;
+    padding-top: 0.8em;
 }
 
-div.body h3, div.body h4, div.body h5 {
+div.body h3, div.body h4, div.body h5, div.body h6 {
     font-size: 100%;
+    padding-top: 0.8em;
 }
 
 #searchbox {
