@@ -2,12 +2,17 @@ DEPDIR = /opt
 INCLUDE = /usr/local/include
 REVISION = 1230d80a5275ddf525da9c218c2bcd29c3130e49
 
-.PHONY: all build clean ci
+.PHONY: all build clean ci docs
 
 all: build
 
 build: clean
 	python3 -m build
+
+docs:
+	make -C docs clean
+	O=-W make -C docs html
+	python3 -m http.server --directory docs/_build/html/
 
 clean:
 	-rm -r dist/ *.egg-info/
