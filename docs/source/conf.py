@@ -39,7 +39,11 @@ autodoc_default_options = {
 }
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
+
+import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# In development, load zbitvector from the working directory
+if os.getenv("SPHINX_NO_LOCAL") is None:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
