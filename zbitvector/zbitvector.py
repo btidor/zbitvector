@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Final, Generic, TypeVar, get_args
 
-from typing_extensions import Self, assert_never
+from typing_extensions import Self, assert_never, override
 
 from ._bitwuzla import BitwuzlaTerm, Kind, ctx
 
@@ -16,8 +16,8 @@ class Symbolic(abc.ABC):
         self._term = term
 
     @classmethod
-    def from_expr(cls, kind: Kind, *terms: BitwuzlaTerm) -> Self:
-        term = ctx.bzla.mk_term(kind, terms)
+    def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
+        term = ctx.bzla.mk_term(kind, tuple(s._term for s in syms))
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
@@ -41,24 +41,24 @@ class Symbolic(abc.ABC):
         >>> Uint8(1) == Uint8(3)
         Constraint(`false`)
         """
-        return Constraint.from_expr(Kind.EQUAL, self._term, other._term)
+        return Constraint._from_expr(Kind.EQUAL, self, other)
 
     def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self, /
     ) -> Constraint:
-        return Constraint.from_expr(Kind.DISTINCT, self._term, other._term)
+        return Constraint._from_expr(Kind.DISTINCT, self, other)
 
     def __invert__(self) -> Self:
-        return self.from_expr(Kind.BV_NOT, self._term)
+        return self._from_expr(Kind.BV_NOT, self)
 
     def __and__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_AND, self._term, other._term)
+        return self._from_expr(Kind.BV_AND, self, other)
 
     def __or__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_OR, self._term, other._term)
+        return self._from_expr(Kind.BV_OR, self, other)
 
     def __xor__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_XOR, self._term, other._term)
+        return self._from_expr(Kind.BV_XOR, self, other)
 
 
 S = TypeVar("S", bound=Symbolic)
@@ -75,7 +75,7 @@ class Constraint(Symbolic):
         super().__init__(term)
 
     def ite(self, then: S, else_: S, /) -> S:
-        return then.from_expr(Kind.ITE, self._term, then._term, else_._term)
+        return then._from_expr(Kind.ITE, self, then, else_)
 
 
 N = TypeVar("N", bound=int)
@@ -120,6 +120,18 @@ class BitVector(Symbolic, Generic[N]):
             assert_never(value)
         super().__init__(term)
 
+    @override
+    @classmethod
+    def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
+        assert isinstance(syms[-1], BitVector)
+        result = super()._from_expr(kind, *syms)
+        result._width = syms[-1]._width  # type: ignore
+        return result
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}{self._width}(`{self.smtlib()}`)"
+
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
         ...
@@ -129,13 +141,13 @@ class BitVector(Symbolic, Generic[N]):
         ...
 
     def __add__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_ADD, self._term, other._term)
+        return self._from_expr(Kind.BV_ADD, self, other)
 
     def __sub__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_SUB, self._term, other._term)
+        return self._from_expr(Kind.BV_SUB, self, other)
 
     def __mul__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_MUL, self._term, other._term)
+        return self._from_expr(Kind.BV_MUL, self, other)
 
     @abc.abstractmethod
     def __floordiv__(self, other: Self, /) -> Self:
@@ -146,7 +158,7 @@ class BitVector(Symbolic, Generic[N]):
         ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
-        return self.from_expr(Kind.BV_SHL, self._term, other._term)
+        return self._from_expr(Kind.BV_SHL, self, other)
 
     @abc.abstractmethod
     def __rshift__(self, other: Uint[N], /) -> Self:
@@ -155,33 +167,33 @@ class BitVector(Symbolic, Generic[N]):
 
 class Uint(BitVector[N]):
     def __lt__(self, other: Self, /) -> Constraint:
-        return Constraint.from_expr(Kind.BV_ULT, self._term, other._term)
+        return Constraint._from_expr(Kind.BV_ULT, self, other)
 
     def __le__(self, other: Self, /) -> Constraint:
-        return Constraint.from_expr(Kind.BV_ULE, self._term, other._term)
+        return Constraint._from_expr(Kind.BV_ULE, self, other)
 
     def __floordiv__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_UDIV, self._term, other._term)
+        return self._from_expr(Kind.BV_UDIV, self, other)
 
     def __mod__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_UREM, self._term, other._term)
+        return self._from_expr(Kind.BV_UREM, self, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self.from_expr(Kind.BV_SHR, self._term, other._term)
+        return self._from_expr(Kind.BV_SHR, self, other)
 
 
 class Int(BitVector[N]):
     def __lt__(self, other: Self, /) -> Constraint:
-        return Constraint.from_expr(Kind.BV_SLT, self._term, other._term)
+        return Constraint._from_expr(Kind.BV_SLT, self, other)
 
     def __le__(self, other: Self, /) -> Constraint:
-        return Constraint.from_expr(Kind.BV_SLE, self._term, other._term)
+        return Constraint._from_expr(Kind.BV_SLE, self, other)
 
     def __floordiv__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_SDIV, self._term, other._term)
+        return self._from_expr(Kind.BV_SDIV, self, other)
 
     def __mod__(self, other: Self, /) -> Self:
-        return self.from_expr(Kind.BV_SREM, self._term, other._term)
+        return self._from_expr(Kind.BV_SREM, self, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self.from_expr(Kind.BV_ASHR, self._term, other._term)
+        return self._from_expr(Kind.BV_ASHR, self, other)
