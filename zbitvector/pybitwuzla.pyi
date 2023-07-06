@@ -662,9 +662,9 @@ class BitwuzlaTerm:
         """:return: The sort of the term.
         :rtype: BitwuzlaSort"""
         ...
-    def get_symbol(self) -> str:
+    def get_symbol(self) -> str | None:
         """:return: The symbol of the term.
-        :rtype: str
+        :rtype: str or None
 
         .. seealso::
             :func:`~pybitwuzla.BitwuzlaTerm.set_symbol`"""

@@ -297,7 +297,7 @@ cdef class BitwuzlaTerm:
 
     def get_symbol(self):
         """:return: The symbol of the term.
-           :rtype: str
+           :rtype: str or None
 
            .. seealso::
                :func:`~pybitwuzla.BitwuzlaTerm.set_symbol`
