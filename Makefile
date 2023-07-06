@@ -11,7 +11,7 @@ build: clean
 
 docs:
 	make -C docs clean
-	O=-W make -C docs html
+	ZBITVECTOR_SOLVER=dummy O=-W make -C docs html
 	python3 -m http.server --directory docs/_build/html/
 
 clean:

@@ -18,10 +18,12 @@ build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 before-all = ["make ci"]
-test-requires = "pytest"
-test-command = """\
+test-requires = ["pytest", "z3-solver"]
+test-command = """ \
     pytest --import-mode=append {project}/tests && \
-    pytest --pyargs --doctest-modules zbitvector\
+    pytest --pyargs --doctest-modules zbitvector && \
+    ZBITVECTOR_BACKEND=z3 pytest --import-mode=append {project}/tests && \
+    ZBITVECTOR_BACKEND=z3 pytest --pyargs --doctest-modules zbitvector \
 """
 
 [tool.pytest.ini_options]

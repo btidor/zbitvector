@@ -1,5 +1,6 @@
 # Dependencies
 typing_extensions
+z3-solver
 
 # Linters
 black

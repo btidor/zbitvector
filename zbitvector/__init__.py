@@ -9,9 +9,29 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"
 
+import os
+
+_solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
+
 # pyright: reportUnusedImport=false
 
-if TYPE_CHECKING:
-    from ._backend import BitVector, Constraint, Int, Symbolic, Uint
+if TYPE_CHECKING or _solver == "dummy":
+    from ._backend import BitVector as BitVector
+    from ._backend import Constraint as Constraint
+    from ._backend import Int as Int
+    from ._backend import Symbolic as Symbolic
+    from ._backend import Uint as Uint
+elif _solver == "bitwuzla":
+    from ._bitwuzla import BitVector as BitVector
+    from ._bitwuzla import Constraint as Constraint
+    from ._bitwuzla import Int as Int
+    from ._bitwuzla import Symbolic as Symbolic
+    from ._bitwuzla import Uint as Uint
+elif _solver == "z3":
+    from ._z3 import BitVector as BitVector
+    from ._z3 import Constraint as Constraint
+    from ._z3 import Int as Int
+    from ._z3 import Symbolic as Symbolic
+    from ._z3 import Uint as Uint
 else:
-    from ._bitwuzla import BitVector, Constraint, Int, Symbolic, Uint
+    raise ValueError(f"unknown solver: {_solver}")

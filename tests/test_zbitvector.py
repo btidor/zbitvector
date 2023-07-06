@@ -8,7 +8,8 @@ from types import ModuleType
 
 import pytest
 
-from zbitvector import Int, _backend, _bitwuzla  # pyright: ignore[reportPrivateUsage]
+from zbitvector import _backend  # pyright: ignore[reportPrivateUsage]
+from zbitvector import Int, _bitwuzla, _z3
 
 
 def test_init_validations():
@@ -24,6 +25,7 @@ def test_init_validations():
 
 def test_backend_api():
     assert enumerate_module(_backend) == enumerate_module(_bitwuzla)
+    assert enumerate_module(_backend) == enumerate_module(_z3)
 
 
 def enumerate_module(module: ModuleType) -> set[str]:
