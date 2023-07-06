@@ -7,9 +7,8 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"
 
-
-from ._zbitvector import BitVector as BitVector
-from ._zbitvector import Constraint as Constraint
-from ._zbitvector import Int as Int
-from ._zbitvector import Symbolic as Symbolic
-from ._zbitvector import Uint as Uint
+from ._bitwuzla import BitVector as BitVector
+from ._bitwuzla import Constraint as Constraint
+from ._bitwuzla import Int as Int
+from ._bitwuzla import Symbolic as Symbolic
+from ._bitwuzla import Uint as Uint
