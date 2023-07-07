@@ -89,3 +89,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# asv benchmark tool
+.asv

@@ -12,6 +12,8 @@ twine
 wheel
 
 # Testing
+asv
+pympler
 pytest
 
 # Documentation

@@ -1,0 +1,39 @@
+{
+    "version": 1,
+    "project": "zbitvector",
+    "project_url": "https://zbitvector.btidor.dev/",
+    "show_commit_url": "http://github.com/btidor/zbitvector/commit/",
+    "repo": ".",
+    "branches": [
+        "main"
+    ],
+    "environment_type": "virtualenv",
+    "build_command": [
+        "python3 -m build --outdir={build_cache_dir}"
+    ],
+    "matrix": {
+        "req": {
+            "build": [
+                ""
+            ],
+            "pympler": [
+                ""
+            ],
+            "z3-solver": [
+                ""
+            ]
+        },
+        "env_nobuild": {
+            "ZBITVECTOR_PROD": [
+                "1"
+            ],
+            "ZBITVECTOR_SOLVER": [
+                "bitwuzla",
+                "z3"
+            ]
+        }
+    },
+    "env_dir": ".asv/env",
+    "results_dir": ".asv/results",
+    "html_dir": ".asv/html"
+}
