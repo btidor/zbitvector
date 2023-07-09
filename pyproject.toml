@@ -26,6 +26,15 @@ test-command = """ \
     ZBITVECTOR_BACKEND=z3 pytest --pyargs --doctest-modules zbitvector \
 """
 
+# Z3 doesn't distribute pre-built binaries for these platforms
+[[tool.cibuildwheel.overrides]]
+select = "*{musllinux,aarch64}*"
+test-requires = ["pytest"]
+test-command = """ \
+    pytest --import-mode=append {project}/tests && \
+    pytest --pyargs --doctest-modules zbitvector
+"""
+
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 

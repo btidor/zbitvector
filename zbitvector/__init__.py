@@ -16,18 +16,21 @@ _solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
 # pyright: reportUnusedImport=false
 
 if TYPE_CHECKING or _solver == "dummy":
+    from . import _backend as _zbitvector
     from ._backend import BitVector as BitVector
     from ._backend import Constraint as Constraint
     from ._backend import Int as Int
     from ._backend import Symbolic as Symbolic
     from ._backend import Uint as Uint
 elif _solver == "bitwuzla":
+    from . import _bitwuzla as _zbitvector
     from ._bitwuzla import BitVector as BitVector
     from ._bitwuzla import Constraint as Constraint
     from ._bitwuzla import Int as Int
     from ._bitwuzla import Symbolic as Symbolic
     from ._bitwuzla import Uint as Uint
 elif _solver == "z3":
+    from . import _z3 as _zbitvector
     from ._z3 import BitVector as BitVector
     from ._z3 import Constraint as Constraint
     from ._z3 import Int as Int
