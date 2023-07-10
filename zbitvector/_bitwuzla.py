@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Final, Generic, TypeVar, get_args, overload
+from typing import TYPE_CHECKING, Final, Generic, TypeVar, overload
 
-from typing_extensions import Self, assert_never, override
+from typing_extensions import Self
+
+from ._util import BitVectorMeta
 
 try:
     from . import pybitwuzla
@@ -22,17 +24,16 @@ except ImportError:
 
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
+
 BOOL_SORT = BZLA.mk_bv_sort(1)
 
 N = TypeVar("N", bound=int)
 
 
 class Symbolic(abc.ABC):
-    _term: Final[BitwuzlaTerm]
-
     @abc.abstractmethod
     def __init__(self, term: BitwuzlaTerm, /) -> None:
-        self._term = term
+        self._term: Final[BitwuzlaTerm] = term
 
     @classmethod
     def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
@@ -71,10 +72,8 @@ class Constraint(Symbolic):
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
             term = BZLA.mk_const(BOOL_SORT, value)
-        elif isinstance(value, bool):  # pyright: ignore[reportUnnecessaryIsInstance]
-            term = BZLA.mk_bv_value(BOOL_SORT, int(value))
         else:
-            assert_never(value)
+            term = BZLA.mk_bv_value(BOOL_SORT, int(value))
         super().__init__(term)
 
     def __invert__(self) -> Self:
@@ -105,56 +104,16 @@ class Constraint(Symbolic):
         return then._from_expr(Kind.ITE, self, then, else_)
 
 
-class BitVector(Symbolic, Generic[N]):
-    _width: Final[int] = 0
-
-    def __class_getitem__(cls, key: TypeVar, /) -> type[Self]:
-        args = get_args(key)
-        if len(args) == 0:
-            return cls
-        elif len(args) == 1 and isinstance(args[0], int):
-            if args[0] <= 0:
-                raise TypeError(f"{cls.__name__} requires a positive width.")
-
-            def construct(value: int | str) -> Self:
-                # Create and initialize a new Int/Uint, with one customization:
-                # we manually specify the instance's _width attribute before
-                # calling __init__.
-                instance = cls.__new__(cls)
-                instance._width = args[0]  # pyright: ignore[reportGeneralTypeIssues]
-                instance.__init__(value)
-                return instance
-
-            return construct  # type: ignore
-        else:
-            raise TypeError(f"Unknown type parameter passed to {cls.__name__}[...].")
+class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
+    _width: int
 
     def __init__(self, value: int | str, /) -> None:
-        if self._width == 0:
-            raise TypeError(
-                f"Cannot instantiate {self.__class__.__name__} directly; "
-                f"use {self.__class__.__name__}[N](...) instead."
-            )
         sort = BZLA.mk_bv_sort(self._width)
         if isinstance(value, str):
             term = BZLA.mk_const(sort, value)
-        elif isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
-            term = BZLA.mk_bv_value(sort, value)
         else:
-            assert_never(value)
+            term = BZLA.mk_bv_value(sort, value)
         super().__init__(term)
-
-    @override
-    @classmethod
-    def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
-        assert isinstance(syms[-1], BitVector)
-        result = super()._from_expr(kind, *syms)
-        result._width = syms[-1]._width  # type: ignore
-        return result
-
-    @override
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}{self._width}(`{self.smtlib()}`)"
 
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:

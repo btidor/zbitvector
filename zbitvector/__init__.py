@@ -1,6 +1,8 @@
 """zbitvector: an efficient, well-typed interface to the Z3 and Bitwuzla SMT solvers."""
 
+# pyright: reportUnusedImport=false
 
+import os
 from importlib import metadata
 from typing import TYPE_CHECKING
 
@@ -9,12 +11,7 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"
 
-import os
-
 _solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
-
-# pyright: reportUnusedImport=false
-
 if TYPE_CHECKING or _solver == "dummy":
     from . import _backend as _zbitvector
     from ._backend import BitVector as BitVector

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import inspect
-import typing
+import re
 from types import ModuleType
+from typing import Literal, TypeVar, Union
 
 import pytest
 
@@ -13,14 +14,33 @@ from zbitvector import Int, _zbitvector
 
 
 def test_init_validations():
-    with pytest.raises(TypeError, match=f"Cannot instantiate Int directly"):
+    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
         Int(123)
 
-    with pytest.raises(TypeError, match="Unknown type parameter passed to Int"):
-        Int[typing.Literal["asdf"]]  # type: ignore
+    IntA = Int[Union[Literal[32], Literal[64]]]
+    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
+        IntA(123)
+
+    K = TypeVar("K", bound=int)
+    IntK = Int[K]
+    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
+        IntK(123)
+
+    with pytest.raises(
+        TypeError,
+        match=r"integer passed to Int\[...\]; use Int\[Literal\[5\]\] instead",
+    ):
+        Int[5]  # type: ignore
+
+    with pytest.raises(TypeError, match="unsupported type parameter passed to Int"):
+        Int[Literal["asdf"]]  # type: ignore
 
     with pytest.raises(TypeError, match="Int requires a positive width"):
-        Int[typing.Literal[-1]]
+        Int[Literal[-1]]
+
+    Int8 = Int[Literal[8]]
+    Int8(123)
+    assert re.match(r"<class 'zbitvector.(_bitwuzla|_z3).Int8'>", repr(Int8))
 
 
 def test_backend_api():

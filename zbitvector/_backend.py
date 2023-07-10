@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Any, Generic, TypeVar, overload
 
-from typing_extensions import Self, override
+from typing_extensions import Self
 
 N = TypeVar("N", bound=int)
 
@@ -159,10 +159,6 @@ class BitVector(Symbolic, Generic[N]):
     """
 
     def __init__(self, value: int | str, /) -> None:
-        raise NotImplementedError
-
-    @override
-    def __repr__(self) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod

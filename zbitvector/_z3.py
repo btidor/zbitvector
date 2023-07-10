@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Final, Generic, TypeVar, get_args, overload
+from typing import Any, Callable, Final, Generic, TypeVar, overload
 
 import z3
-from typing_extensions import Self, assert_never, override
+from typing_extensions import Self
+
+from ._util import BitVectorMeta
 
 CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 BOOL_SORT = z3.Z3_mk_bool_sort(CTX)
@@ -17,11 +19,9 @@ N = TypeVar("N", bound=int)
 
 
 class Symbolic(abc.ABC):
-    _term: Final[Any]
-
     @abc.abstractmethod
     def __init__(self, term: Any, /) -> None:
-        self._term = term
+        self._term: Final[Any] = term
 
     @classmethod
     def _from_expr(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
@@ -68,10 +68,8 @@ class Constraint(Symbolic):
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
             term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), BOOL_SORT)
-        elif isinstance(value, bool):  # pyright: ignore[reportUnnecessaryIsInstance]
-            term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         else:
-            assert_never(value)
+            term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         Symbolic.__init__(self, term)
 
     def __invert__(self) -> Self:
@@ -102,64 +100,16 @@ class Constraint(Symbolic):
         return then._from_expr(z3.Z3_mk_ite, self, then, else_)
 
 
-class BitVector(Symbolic, Generic[N]):
-    _width: Final[int] = 0
-
-    def __class_getitem__(cls, key: TypeVar, /) -> type[Self]:
-        args = get_args(key)
-        if len(args) == 0:
-            return cls
-        elif len(args) == 1 and isinstance(args[0], int):
-            if args[0] <= 0:
-                raise TypeError(f"{cls.__name__} requires a positive width.")
-
-            def construct(value: int | str) -> Self:
-                # Create and initialize a new Int/Uint, with one customization:
-                # we manually specify the instance's _width attribute before
-                # calling __init__.
-                instance = cls.__new__(cls)
-                instance._width = args[0]  # pyright: ignore[reportGeneralTypeIssues]
-                instance.__init__(value)
-                return instance
-
-            return construct  # type: ignore
-        else:
-            raise TypeError(f"Unknown type parameter passed to {cls.__name__}[...].")
+class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
+    _width: int
 
     def __init__(self, value: int | str, /) -> None:
-        if self._width == 0:
-            raise TypeError(
-                f"Cannot instantiate {self.__class__.__name__} directly; "
-                f"use {self.__class__.__name__}[N](...) instead."
-            )
         sort = z3.Z3_mk_bv_sort(CTX, self._width)
         if isinstance(value, str):
             term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), sort)
-        elif isinstance(value, int):  # pyright: ignore[reportUnnecessaryIsInstance]
-            term = z3.Z3_mk_numeral(CTX, str(value), sort)
         else:
-            assert_never(value)
+            term = z3.Z3_mk_numeral(CTX, str(value), sort)
         Symbolic.__init__(self, term)
-
-    @override
-    @classmethod
-    def _from_expr(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
-        assert isinstance(syms[-1], BitVector)
-        result = super()._from_expr(kind, *syms)
-        result._width = syms[-1]._width  # type: ignore
-        return result
-
-    @override
-    @classmethod
-    def _from_expr_tuple(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
-        assert isinstance(syms[-1], BitVector)
-        result = super()._from_expr_tuple(kind, *syms)
-        result._width = syms[-1]._width  # type: ignore
-        return result
-
-    @override
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}{self._width}(`{self.smtlib()}`)"
 
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
