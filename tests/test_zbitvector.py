@@ -10,7 +10,8 @@ from typing import Literal, TypeVar, Union
 import pytest
 
 from zbitvector import _backend  # pyright: ignore[reportPrivateUsage]
-from zbitvector import Int, _zbitvector
+from zbitvector import Constraint, Int, _zbitvector
+from zbitvector.conftest import Int8, Uint8
 
 
 def test_init_validations():
@@ -44,10 +45,10 @@ def test_init_validations():
 
 
 def test_backend_api():
-    assert enumerate_module(_backend) == enumerate_module(_zbitvector)
+    assert _enumerate_module(_backend) == _enumerate_module(_zbitvector)
 
 
-def enumerate_module(module: ModuleType) -> set[str]:
+def _enumerate_module(module: ModuleType) -> set[str]:
     results: set[str] = set()
     for _, c in inspect.getmembers(module):
         if not inspect.isclass(c):
@@ -65,3 +66,8 @@ def enumerate_module(module: ModuleType) -> set[str]:
                 continue
             results.add(f"{c.__name__}.{f.__name__}{inspect.signature(f)}")
     return results
+
+
+def test_uses_slots():
+    for cls in (Constraint(True), Uint8(0), Int8(0)):
+        assert not hasattr(cls, "__dict__")

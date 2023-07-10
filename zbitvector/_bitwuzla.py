@@ -31,6 +31,8 @@ N = TypeVar("N", bound=int)
 
 
 class Symbolic(abc.ABC):
+    __slots__ = ("_term",)
+
     @abc.abstractmethod
     def __init__(self, term: BitwuzlaTerm, /) -> None:
         self._term: Final[BitwuzlaTerm] = term
@@ -69,6 +71,8 @@ class Symbolic(abc.ABC):
 
 
 class Constraint(Symbolic):
+    __slots__ = ()
+
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
             term = BZLA.mk_const(BOOL_SORT, value)
@@ -106,6 +110,7 @@ class Constraint(Symbolic):
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     _width: int
+    __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
         sort = BZLA.mk_bv_sort(self._width)
@@ -161,6 +166,8 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 
 
 class Uint(BitVector[N]):
+    __slots__ = ()
+
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_ULT, self, other)
 
@@ -178,6 +185,8 @@ class Uint(BitVector[N]):
 
 
 class Int(BitVector[N]):
+    __slots__ = ()
+
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_SLT, self, other)
 

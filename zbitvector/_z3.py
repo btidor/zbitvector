@@ -19,6 +19,8 @@ N = TypeVar("N", bound=int)
 
 
 class Symbolic(abc.ABC):
+    __slots__ = ("_term",)
+
     @abc.abstractmethod
     def __init__(self, term: Any, /) -> None:
         self._term: Final[Any] = term
@@ -65,6 +67,8 @@ class Symbolic(abc.ABC):
 
 
 class Constraint(Symbolic):
+    __slots__ = ()
+
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
             term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), BOOL_SORT)
@@ -102,6 +106,7 @@ class Constraint(Symbolic):
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     _width: int
+    __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
         sort = z3.Z3_mk_bv_sort(CTX, self._width)
@@ -157,6 +162,8 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 
 
 class Uint(BitVector[N]):
+    __slots__ = ()
+
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(z3.Z3_mk_bvult, self, other)
 
@@ -174,6 +181,8 @@ class Uint(BitVector[N]):
 
 
 class Int(BitVector[N]):
+    __slots__ = ()
+
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(z3.Z3_mk_bvslt, self, other)
 
