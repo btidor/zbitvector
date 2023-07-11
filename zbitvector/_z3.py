@@ -45,7 +45,7 @@ class Symbolic(abc.ABC):
     def __copy__(self) -> Self:
         return self
 
-    def __deepcopy__(self) -> Self:
+    def __deepcopy__(self, memo: Any) -> Self:
         return self
 
     def __repr__(self) -> str:

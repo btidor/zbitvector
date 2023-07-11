@@ -21,7 +21,7 @@ class Symbolic(abc.ABC):
     def __copy__(self) -> Self:
         raise NotImplementedError
 
-    def __deepcopy__(self) -> Self:
+    def __deepcopy__(self, memo: Any) -> Self:
         raise NotImplementedError
 
     def __repr__(self) -> str:
