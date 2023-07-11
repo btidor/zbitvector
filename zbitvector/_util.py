@@ -17,7 +17,7 @@ class BitVectorMeta(abc.ABCMeta):
         Uint's metaclass; "N" is an instance of typing.Literal. We unwrap the
         Literal to get the underlying int parameter n. Then we use `type()` to
         dynamically create a class, Uintn, which inherits from Uint and has the
-        _width attribute set to n.
+        _sort attribute set based on n.
 
         Unfortunately, classes created with `type()` are invisible to the type
         checker. So, during type checking, "Uint[N]" is treated as an instance
@@ -31,7 +31,7 @@ class BitVectorMeta(abc.ABCMeta):
         if get_origin(N) != Literal:
             # No-op unbound type variables, unions, etc. These kind of Uint[...]
             # can be used in type signatures. Note that trying to instantiate
-            # one will raise an error because _width is not defined.
+            # one will raise an error because _sort is not defined.
             return self
 
         args = get_args(N)
@@ -46,7 +46,8 @@ class BitVectorMeta(abc.ABCMeta):
 
         name = self.__name__ + str(n)
         if name not in self._ccache:
-            cls = type(name, (self,), {"_width": n, "__slots__": ()})
+            sort = cast(Any, self)._make_sort(n)
+            cls = type(name, (self,), {"_sort": sort, "__slots__": ()})
             cls.__module__ = self.__module__
             self._ccache[name] = cls
         return cast(Self, self._ccache[name])

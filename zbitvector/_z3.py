@@ -13,7 +13,6 @@ from typing_extensions import Self
 from ._util import BitVectorMeta
 
 CTX = z3.Z3_mk_context(z3.Z3_mk_config())
-BOOL_SORT = z3.Z3_mk_bool_sort(CTX)
 
 N = TypeVar("N", bound=int)
 
@@ -67,11 +66,12 @@ class Symbolic(abc.ABC):
 
 
 class Constraint(Symbolic):
+    _sort: Final[Any] = z3.Z3_mk_bool_sort(CTX)
     __slots__ = ()
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), BOOL_SORT)
+            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
         else:
             term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         Symbolic.__init__(self, term)
@@ -105,16 +105,19 @@ class Constraint(Symbolic):
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
-    _width: int
+    _sort: Final[Any]  # type: ignore
     __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
-        sort = z3.Z3_mk_bv_sort(CTX, self._width)
         if isinstance(value, str):
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), sort)
+            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
         else:
-            term = z3.Z3_mk_numeral(CTX, str(value), sort)
+            term = z3.Z3_mk_numeral(CTX, str(value), self._sort)
         Symbolic.__init__(self, term)
+
+    @classmethod
+    def _make_sort(cls, width: int) -> Any:
+        return z3.Z3_mk_bv_sort(CTX, width)
 
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:

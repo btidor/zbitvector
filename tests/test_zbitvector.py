@@ -15,16 +15,16 @@ from zbitvector.conftest import Int8, Uint8
 
 
 def test_init_validations():
-    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
+    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
         Int(123)
 
     IntA = Int[Union[Literal[32], Literal[64]]]
-    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
+    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
         IntA(123)
 
     K = TypeVar("K", bound=int)
     IntK = Int[K]
-    with pytest.raises(AttributeError, match=f"has no attribute '_width'"):
+    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
         IntK(123)
 
     with pytest.raises(

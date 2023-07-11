@@ -9,6 +9,7 @@ from ._util import BitVectorMeta
 
 try:
     from . import pybitwuzla
+    from .pybitwuzla import BitwuzlaSort as BitwuzlaSort
     from .pybitwuzla import BitwuzlaTerm as BitwuzlaTerm
     from .pybitwuzla import Kind as Kind
     from .pybitwuzla import Option as Option
@@ -19,13 +20,11 @@ except ImportError:
     if TYPE_CHECKING:
         raise
     import pybitwuzla
-    from pybitwuzla import BitwuzlaTerm, Kind, Option
+    from pybitwuzla import BitwuzlaSort, BitwuzlaTerm, Kind, Option
 
 
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
-
-BOOL_SORT = BZLA.mk_bv_sort(1)
 
 N = TypeVar("N", bound=int)
 
@@ -71,13 +70,14 @@ class Symbolic(abc.ABC):
 
 
 class Constraint(Symbolic):
+    _sort: Final[BitwuzlaSort] = BZLA.mk_bool_sort()
     __slots__ = ()
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = BZLA.mk_const(BOOL_SORT, value)
+            term = BZLA.mk_const(self._sort, value)
         else:
-            term = BZLA.mk_bv_value(BOOL_SORT, int(value))
+            term = BZLA.mk_bv_value(self._sort, int(value))
         super().__init__(term)
 
     def __invert__(self) -> Self:
@@ -109,16 +109,19 @@ class Constraint(Symbolic):
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
-    _width: int
+    _sort: Final[BitwuzlaSort]  # type: ignore
     __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
-        sort = BZLA.mk_bv_sort(self._width)
         if isinstance(value, str):
-            term = BZLA.mk_const(sort, value)
+            term = BZLA.mk_const(self._sort, value)
         else:
-            term = BZLA.mk_bv_value(sort, value)
+            term = BZLA.mk_bv_value(self._sort, value)
         super().__init__(term)
+
+    @classmethod
+    def _make_sort(cls, width: int) -> BitwuzlaSort:
+        return BZLA.mk_bv_sort(width)
 
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
