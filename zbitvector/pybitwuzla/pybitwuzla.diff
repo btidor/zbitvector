@@ -150,7 +150,7 @@
 -           :type terms: list(BitwuzlaTerm)
 -           :param indices: The argument terms.
 -           :type indices: list(int)
-+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
++           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
 
             :return: A term representing an operation of given kind.
             :rtype: BitwuzlaTerm
@@ -193,7 +193,7 @@
 
             :param terms: List of terms to apply substitutions.
 -           :type terms: list(BitwuzlaTerm)
-+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm) or BitwuzlaTerm
++           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...) or BitwuzlaTerm
             :param subst_map: The substitution map mapping constants or
                               variables to terms.
             :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)

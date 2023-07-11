@@ -440,7 +440,7 @@ class Bitwuzla:
         :rtype: BitwuzlaTerm"""
         ...
     def mk_term(
-        self, kind: Kind, terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm]
+        self, kind: Kind, terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...]
     ) -> BitwuzlaTerm:
         """mk_term(kind, terms)
 
@@ -449,7 +449,7 @@ class Bitwuzla:
         :param kind: The operator kind.
         :type kind: Kind
         :param terms: The number of argument terms.
-        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
+        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
 
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
@@ -540,7 +540,7 @@ class Bitwuzla:
         ...
     def substitute(
         self,
-        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm] | BitwuzlaTerm,
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...] | BitwuzlaTerm,
         subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
     ) -> list[BitwuzlaTerm]:
         """substitute(terms, subst_map)
@@ -549,7 +549,7 @@ class Bitwuzla:
         substitutions in ``subst_map``.
 
         :param terms: List of terms to apply substitutions.
-        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm) or BitwuzlaTerm
+        :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...) or BitwuzlaTerm
         :param subst_map: The substitution map mapping constants or
                           variables to terms.
         :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)

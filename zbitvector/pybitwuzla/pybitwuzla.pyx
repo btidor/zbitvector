@@ -1340,7 +1340,7 @@ cdef class Bitwuzla:
            :param kind: The operator kind.
            :type kind: Kind
            :param terms: The number of argument terms.
-           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm)
+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
 
            :return: A term representing an operation of given kind.
            :rtype: BitwuzlaTerm
@@ -1374,7 +1374,7 @@ cdef class Bitwuzla:
            substitutions in ``subst_map``.
 
            :param terms: List of terms to apply substitutions.
-           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm) or BitwuzlaTerm
+           :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...) or BitwuzlaTerm
            :param subst_map: The substitution map mapping constants or
                              variables to terms.
            :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)
