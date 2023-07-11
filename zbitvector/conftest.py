@@ -22,6 +22,13 @@ def pytest_ignore_collect(path: Any) -> bool:
 
 @pytest.fixture(autouse=True)
 def setup_doctest(doctest_namespace: Dict[str, Any]) -> None:
-    doctest_namespace["Constraint"] = Constraint
-    doctest_namespace["Uint8"] = Uint8
-    doctest_namespace["Int8"] = Int8
+    doctest_namespace.clear
+    doctest_namespace.update(
+        {
+            "Constraint": Constraint,
+            "Uint8": Uint8,
+            "Uint64": Uint64,
+            "Int8": Int8,
+            "Int64": Int64,
+        }
+    )
