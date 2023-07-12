@@ -49,10 +49,7 @@ class Symbolic(abc.ABC):
         return self
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(`{self.smtlib()}`)"
-
-    def smtlib(self) -> str:
-        return z3.Z3_ast_to_string(CTX, self._term)
+        return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, self._term)}`)"
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self, /

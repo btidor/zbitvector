@@ -51,12 +51,8 @@ class Symbolic(abc.ABC):
         return self
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(`{self.smtlib()}`)"
-
-    def smtlib(self) -> str:
-        if (sym := self._term.get_symbol()) is not None:
-            return sym
-        return self._term.dump("smt2")
+        smt = self._term.get_symbol() or self._term.dump("smt2")
+        return f"{self.__class__.__name__}(`{smt}`)"
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self, /

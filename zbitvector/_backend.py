@@ -27,14 +27,6 @@ class Symbolic(abc.ABC):
     def __repr__(self) -> str:
         raise NotImplementedError
 
-    def smtlib(self) -> str:
-        """
-        Export this expression in the `SMT-LIBv2`_ format.
-
-        .. _SMT-LIBv2: https://smtlib.cs.uiowa.edu/
-        """
-        raise NotImplementedError
-
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self, /
     ) -> Constraint:
