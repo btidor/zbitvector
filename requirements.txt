@@ -5,6 +5,7 @@ z3-solver
 # Linters
 black
 pydocstyle
+pyright
 
 # Toolchain
 build

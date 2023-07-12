@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import re
+from collections.abc import Hashable
 from types import ModuleType
 from typing import Literal, TypeVar, Union
 
@@ -75,8 +76,19 @@ def test_uses_slots():
 
 def test_bool():
     with pytest.raises(TypeError, match="cannot use Constraint in a boolean context"):
-        if Constraint(True):  # pyright: ignore
+        if Constraint(True):  # type: ignore
             pass
 
     if Uint8(0):  # allowed
         pass
+
+
+def test_hash():
+    assert not isinstance(Constraint(True), Hashable)
+    assert not isinstance(Uint8(0), Hashable)
+
+    # Make sure these raise an error both at runtime and from the typechecker:
+    with pytest.raises(TypeError, match="unhashable type"):
+        _ = {Constraint(True): 1}  # pyright: ignore[reportGeneralTypeIssues]
+    with pytest.raises(TypeError, match="unhashable type"):
+        _ = {Uint8(0): 0}  # pyright: ignore[reportGeneralTypeIssues]

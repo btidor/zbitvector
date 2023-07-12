@@ -35,6 +35,10 @@ test-command = """ \
     pytest --pyargs --doctest-modules zbitvector
 """
 
+[tool.pyright]
+strict = ["**/*"]
+reportUnnecessaryTypeIgnoreComment = true
+
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 

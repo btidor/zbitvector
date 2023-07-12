@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Generic, TypeVar, overload
+from typing import Any, ClassVar, Generic, TypeVar, overload
 
 from typing_extensions import Never, Self
 
@@ -13,6 +13,8 @@ class Symbolic(abc.ABC):
     Represents any symbolic expression. This abstract base class is inherited by
     :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
+
+    __hash__: ClassVar[None] = None  # pyright: ignore[reportIncompatibleMethodOverride]
 
     @abc.abstractmethod
     def __init__(self, term: Any, /) -> None:

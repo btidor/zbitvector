@@ -5,10 +5,10 @@ from typing_extensions import TypeAlias
 
 from zbitvector import Constraint, Int, Uint
 
+# pyright: reportUnusedExpression=false
+
 Uint64: TypeAlias = Uint[Literal[64]]
 Int64: TypeAlias = Int[Literal[64]]
-
-# pyright: reportUnusedExpression=false
 
 
 class TimeConstraintSuite:

@@ -1,7 +1,3 @@
-# pyright: reportUnknownMemberType=false
-# pyright: reportUnknownArgumentType=false
-# pyright: reportMissingTypeStubs=false
-
 from __future__ import annotations
 
 import abc
@@ -11,6 +7,10 @@ import z3
 from typing_extensions import Never, Self
 
 from ._util import BitVectorMeta
+
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportMissingTypeStubs=false
 
 CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 

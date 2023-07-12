@@ -7,6 +7,8 @@ import re
 
 from zbitvector import pybitwuzla  # type: ignore
 
+# pyright: reportUnnecessaryTypeIgnoreComment=false
+
 
 def munge(expr: str) -> str:
     expr = re.sub(r"(list|tuple|dict)([^(])", r"\1[Any]\2", expr)
@@ -27,7 +29,7 @@ print()
 for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
     if not inspect.isclass(topic):
         continue
-    if inspect.getmodule(topic) != pybitwuzla: # type: ignore
+    if inspect.getmodule(topic) != pybitwuzla:  # type: ignore
         continue
 
     if issubclass(topic, enum.Enum):
