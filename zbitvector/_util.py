@@ -25,7 +25,7 @@ class BitVectorMeta(abc.ABCMeta):
         """
         if isinstance(N, int):
             raise TypeError(
-                f"integer passed to {self.__name__}[...]; use {self.__name__}[Literal[{N}]] instead."
+                f"integer passed to {self.__name__}[...]; use {self.__name__}[Literal[{N}]] instead"
             )
 
         if get_origin(N) != Literal:
@@ -37,12 +37,12 @@ class BitVectorMeta(abc.ABCMeta):
         args = get_args(N)
         if len(args) != 1 or not isinstance(args[0], int):
             raise TypeError(
-                f"unsupported type parameter passed to {self.__name__}[...]."
+                f"unsupported type parameter passed to {self.__name__}[...]"
             )
 
         n = args[0]
         if n <= 0:
-            raise TypeError(f"{self.__name__} requires a positive width.")
+            raise TypeError(f"{self.__name__} requires a positive width")
 
         name = self.__name__ + str(n)
         if name not in self._ccache:

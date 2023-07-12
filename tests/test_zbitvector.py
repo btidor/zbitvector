@@ -71,3 +71,12 @@ def _enumerate_module(module: ModuleType) -> set[str]:
 def test_uses_slots():
     for cls in (Constraint(True), Uint8(0), Int8(0)):
         assert not hasattr(cls, "__dict__")
+
+
+def test_bool():
+    with pytest.raises(TypeError, match="cannot use Constraint in a boolean context"):
+        if Constraint(True):  # pyright: ignore
+            pass
+
+    if Uint8(0):  # allowed
+        pass

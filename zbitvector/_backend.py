@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Any, Generic, TypeVar, overload
 
-from typing_extensions import Self
+from typing_extensions import Never, Self
 
 N = TypeVar("N", bound=int)
 
@@ -116,6 +116,24 @@ class Constraint(Symbolic):
 
         >>> Constraint(True) ^ Constraint(False)
         Constraint(`true`)
+        """
+        raise NotImplementedError
+
+    def __bool__(self) -> Never:
+        """
+        Prohibit using :class:`Constraint` in a boolean context.
+
+        Without this check, all instances of :class:`Constraint` would be
+        considered true and it would be easy to mis-use :class:`Constraint` in
+        an if statement:
+
+        .. code::
+
+            a, b = Uint8(...), Uint8(...)
+            if a > b:
+                ...
+            else:
+                ...  # unreachable!
         """
         raise NotImplementedError
 

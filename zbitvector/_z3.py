@@ -8,7 +8,7 @@ import abc
 from typing import Any, Callable, Final, Generic, TypeVar, overload
 
 import z3
-from typing_extensions import Self
+from typing_extensions import Never, Self
 
 from ._util import BitVectorMeta
 
@@ -84,6 +84,9 @@ class Constraint(Symbolic):
 
     def __xor__(self, other: Self, /) -> Self:
         return self._from_expr(z3.Z3_mk_xor, self, other)
+
+    def __bool__(self) -> Never:
+        raise TypeError("cannot use Constraint in a boolean context")
 
     @overload
     def ite(self, then: Uint[N], else_: Uint[N]) -> Uint[N]:
