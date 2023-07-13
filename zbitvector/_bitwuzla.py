@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any, Final, Generic, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Final, Generic, TypeVar
 
 from typing_extensions import Never, Self
 
@@ -27,6 +27,7 @@ BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 
 N = TypeVar("N", bound=int)
+M = TypeVar("M", bound=int)
 
 
 class Symbolic(abc.ABC):
@@ -91,23 +92,12 @@ class Constraint(Symbolic):
     def __bool__(self) -> Never:
         raise TypeError("cannot use Constraint in a boolean context")
 
-    @overload
-    def ite(self, then: Uint[N], else_: Uint[N]) -> Uint[N]:
-        ...
-
-    @overload
-    def ite(self, then: Int[N], else_: Int[N]) -> Int[N]:
-        ...
-
-    @overload
-    def ite(self, then: Constraint, else_: Constraint) -> Constraint:
-        ...
-
     def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
         return then._from_expr(Kind.ITE, self, then, else_)
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
+    width: Final[int]  # type: ignore
     _sort: Final[BitwuzlaSort]  # type: ignore
     __slots__ = ()
 
@@ -185,6 +175,19 @@ class Uint(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(Kind.BV_SHR, self, other)
 
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        if self.width < other.width:
+            term = BZLA.mk_term(
+                Kind.BV_ZERO_EXTEND, (self._term,), (other.width - self.width,)
+            )
+        elif self.width > other.width:
+            term = BZLA.mk_term(Kind.BV_EXTRACT, (self._term,), (other.width - 1, 0))
+        else:
+            term = self._term
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result
+
 
 class Int(BitVector[N]):
     __slots__ = ()
@@ -203,3 +206,16 @@ class Int(BitVector[N]):
 
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(Kind.BV_ASHR, self, other)
+
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        if self.width < other.width:
+            term = BZLA.mk_term(
+                Kind.BV_SIGN_EXTEND, (self._term,), (other.width - self.width,)
+            )
+        elif self.width > other.width:
+            term = BZLA.mk_term(Kind.BV_EXTRACT, (self._term,), (other.width - 1, 0))
+        else:
+            term = self._term
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result

@@ -47,7 +47,7 @@ class BitVectorMeta(abc.ABCMeta):
         name = self.__name__ + str(n)
         if name not in self._ccache:
             sort = cast(Any, self)._make_sort(n)
-            cls = type(name, (self,), {"_sort": sort, "__slots__": ()})
+            cls = type(name, (self,), {"width": n, "_sort": sort, "__slots__": ()})
             cls.__module__ = self.__module__
             self._ccache[name] = cls
         return cast(Self, self._ccache[name])

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Final, Generic, TypeVar, overload
+from typing import Any, Callable, Final, Generic, TypeVar
 
 import z3
 from typing_extensions import Never, Self
@@ -15,6 +15,7 @@ from ._util import BitVectorMeta
 CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 
 N = TypeVar("N", bound=int)
+M = TypeVar("M", bound=int)
 
 
 class Symbolic(abc.ABC):
@@ -88,23 +89,12 @@ class Constraint(Symbolic):
     def __bool__(self) -> Never:
         raise TypeError("cannot use Constraint in a boolean context")
 
-    @overload
-    def ite(self, then: Uint[N], else_: Uint[N]) -> Uint[N]:
-        ...
-
-    @overload
-    def ite(self, then: Int[N], else_: Int[N]) -> Int[N]:
-        ...
-
-    @overload
-    def ite(self, then: Constraint, else_: Constraint) -> Constraint:
-        ...
-
     def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
         return then._from_expr(z3.Z3_mk_ite, self, then, else_)
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
+    width: Final[int]  # type: ignore
     _sort: Final[Any]  # type: ignore
     __slots__ = ()
 
@@ -182,6 +172,18 @@ class Uint(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(z3.Z3_mk_bvlshr, self, other)
 
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        if self.width < other.width:
+            term = z3.Z3_mk_zero_ext(CTX, other.width - self.width, self._term)
+        elif self.width > other.width:
+            term = z3.Z3_mk_extract(CTX, other.width - 1, 0, self._term)
+        else:
+            term = self._term
+        term = z3.Z3_simplify(CTX, term)
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result
+
 
 class Int(BitVector[N]):
     __slots__ = ()
@@ -200,3 +202,15 @@ class Int(BitVector[N]):
 
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(z3.Z3_mk_bvashr, self, other)
+
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        if self.width < other.width:
+            term = z3.Z3_mk_sign_ext(CTX, other.width - self.width, self._term)
+        elif self.width > other.width:
+            term = z3.Z3_mk_extract(CTX, other.width - 1, 0, self._term)
+        else:
+            term = self._term
+        term = z3.Z3_simplify(CTX, term)
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result

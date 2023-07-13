@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, ClassVar, Generic, TypeVar, overload
+from typing import Any, ClassVar, Final, Generic, TypeVar, overload
 
 from typing_extensions import Never, Self
 
 N = TypeVar("N", bound=int)
+M = TypeVar("M", bound=int)
 
 
 class Symbolic(abc.ABC):
@@ -168,6 +169,14 @@ class BitVector(Symbolic, Generic[N]):
     """
     Represents a symbolic N-bit bitvector. This abstract base class is inherited
     by :class:`Uint` and :class:`Int`.
+    """
+
+    width: Final[int]  # type: ignore
+    """
+    The number of bits in this bitvector.
+
+    >>> Uint8(0).width
+    8
     """
 
     def __init__(self, value: int | str, /) -> None:
@@ -379,6 +388,38 @@ class Uint(BitVector[N]):
         """
         raise NotImplementedError
 
+    @overload
+    def into(self: Uint[N], other: type[Int[N]]) -> Int[N]:
+        ...
+
+    @overload
+    def into(self: Uint[N], other: type[Uint[M]]) -> Uint[M]:
+        ...
+
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        """
+        Forcibly convert this bitvector to the given type.
+
+        When converting to an :class:`Int`, the underlying bits are
+        reinterpreted as a two's complement signed integer:
+
+        >>> Uint8(255).into(Int8)
+        Int8(`#xff`)
+
+        When converting to a longer :class:`Uint`, the underling bits are
+        zero-extended:
+
+        >>> Uint8(0xFF).into(Uint64)
+        Uint64(`#x00000000000000ff`)
+
+        When converting to a shorter :class:`Uint`, the underlying bits are
+        truncated:
+
+        >>> Uint64(0x1234).into(Uint8)
+        Uint8(`#x34`)
+        """
+        raise NotImplementedError
+
 
 class Int(BitVector[N]):
     """Represents an N-bit signed integer in two's complement form."""
@@ -464,5 +505,37 @@ class Int(BitVector[N]):
 
         >>> Int8(-8) >> Uint8(2)
         Int8(`#xfe`)
+        """
+        raise NotImplementedError
+
+    @overload
+    def into(self: Int[N], other: type[Uint[N]]) -> Uint[N]:
+        ...
+
+    @overload
+    def into(self: Int[N], other: type[Int[M]]) -> Int[M]:
+        ...
+
+    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+        """
+        Forcibly convert this bitvector to the given type.
+
+        When converting to a :class:`Uint`, the underlying bits are
+        reinterpreted as an unsigned integer, from two's complement form:
+
+        >>> Int8(-1).into(Uint8)
+        Uint8(`#xff`)
+
+        When converting to a longer :class:`Int`, the underling bits are
+        sign-extended:
+
+        >>> Int8(0xFF).into(Int64)
+        Int64(`#xffffffffffffffff`)
+
+        When converting to a shorter :class:`Int`, the underlying bits are
+        truncated:
+
+        >>> Int64(0xFFFFFFFFFFFFFF01).into(Int8)
+        Int8(`#x01`)
         """
         raise NotImplementedError
