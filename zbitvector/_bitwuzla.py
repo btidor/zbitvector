@@ -15,6 +15,7 @@ try:
     from .pybitwuzla import BitwuzlaTerm as BitwuzlaTerm
     from .pybitwuzla import Kind as Kind
     from .pybitwuzla import Option as Option
+    from .pybitwuzla import Result as Result
 except ImportError:
     # In development, the import above will fail because pybitwuzla hasn't been
     # compiled. Fall back to the global pybitwuzla module (but don't tell the
@@ -22,10 +23,11 @@ except ImportError:
     if TYPE_CHECKING:
         raise
     import pybitwuzla
-    from pybitwuzla import BitwuzlaSort, BitwuzlaTerm, Kind, Option
+    from pybitwuzla import BitwuzlaSort, BitwuzlaTerm, Kind, Option, Result
 
 
 BZLA = pybitwuzla.Bitwuzla()
+BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 
 N = TypeVar("N", bound=int)
@@ -239,3 +241,29 @@ class Int(BitVector[N]):
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
+
+
+class Solver:
+    def __init__(self) -> None:
+        self._assertions: list[Constraint] = []
+
+    def add(self, assertion: Constraint, /) -> None:
+        self._assertions.append(assertion)
+
+    def check(self, *assumptions: Constraint) -> bool:
+        # Unfortunately, we have only the single global solver instance, BZLA,
+        # because all terms are tied to it. This means we can't build up
+        # assumptions using `assert_formula`. Instead, assume them all on every
+        # call to `check`:
+        for c in self._assertions:
+            BZLA.assume_formula(c._term)  # pyright: ignore[reportPrivateUsage]
+        for c in assumptions:
+            BZLA.assume_formula(c._term)  # pyright: ignore[reportPrivateUsage]
+
+        r = BZLA.check_sat()
+        if r == Result.SAT:
+            return True
+        elif r == Result.UNSAT:
+            return False
+        else:
+            raise RuntimeError("Bitwuzla could not solve this instance")

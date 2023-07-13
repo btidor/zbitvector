@@ -8,3 +8,4 @@ API Reference
     :exclude-members: width
 .. autoclass:: zbitvector.Int
     :exclude-members: width
+.. autoclass:: zbitvector.Solver

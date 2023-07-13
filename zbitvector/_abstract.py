@@ -546,3 +546,33 @@ class Int(BitVector[N]):
         Int8(`#x01`)
         """
         raise NotImplementedError
+
+
+class Solver:
+    """
+    A SAT solver instance.
+
+    >>> s = Solver()
+    >>> s.add(Uint8("B") == Uint8(1))
+    >>> s.check()
+    True
+    >>> s.add(Uint8("B") == Uint8(2))
+    >>> s.check()
+    False
+    """
+
+    def __init__(self) -> None:
+        raise NotImplementedError
+
+    def add(self, assertion: Constraint, /) -> None:
+        """Permanently add an assertion to the solver state."""
+        raise NotImplementedError
+
+    def check(self, *assumptions: Constraint) -> bool:
+        """
+        Check whether the solver state is satisfiable.
+
+        If provided, *assumptions* are temporarily added to the solver state for
+        this check only.
+        """
+        raise NotImplementedError

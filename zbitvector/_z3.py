@@ -216,3 +216,26 @@ class Int(BitVector[N]):
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
+
+
+class Solver:
+    def __init__(self) -> None:
+        self._solver = z3.Z3_mk_solver(CTX)
+
+    def add(self, assertion: Constraint, /) -> None:
+        z3.Z3_solver_assert(
+            CTX, self._solver, assertion._term  # pyright: ignore[reportPrivateUsage]
+        )
+
+    def check(self, *assumptions: Constraint) -> bool:
+        arr = (z3.Ast * len(assumptions))(
+            *(a._term for a in assumptions)  # pyright: ignore[reportPrivateUsage]
+        )
+        r = z3.Z3_solver_check_assumptions(CTX, self._solver, len(assumptions), arr)
+        if r == z3.Z3_L_TRUE:
+            return True
+        elif r == z3.Z3_L_FALSE:
+            return False
+        else:
+            reason = z3.Z3_solver_get_reason_unknown(CTX, self._solver)
+            raise RuntimeError(f"Z3 could not solve this instance: {reason}")
