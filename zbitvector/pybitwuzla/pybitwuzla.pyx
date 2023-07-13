@@ -74,6 +74,14 @@ cdef const bitwuzla_api.BitwuzlaTerm** _alloc_terms_const(size):
         raise MemoryError()
     return terms
 
+cdef uint32_t* _alloc_indices_const(size):
+    cdef uint32_t *indices = \
+        <uint32_t *> \
+            malloc(size * sizeof(uint32_t))
+    if not indices:
+        raise MemoryError()
+    return indices
+
 cdef const bitwuzla_api.BitwuzlaSort** _alloc_sorts_const(size):
     cdef const bitwuzla_api.BitwuzlaSort **sorts = \
         <const bitwuzla_api.BitwuzlaSort **> \
@@ -250,7 +258,7 @@ cdef class BitwuzlaTerm:
            Get string representation of term in format ``fmt``.
 
            :param fmt: Output format. Available formats: "btor", "smt2"
-           :type fmt: str
+           :type fmt: str = "smt2"
 
            :return: String representation of the term in format ``fmt``.
            :rtype: str
@@ -518,7 +526,7 @@ cdef class Bitwuzla:
            Push new context levels.
 
            :param levels: Number of context levels to create.
-           :type levels: int
+           :type levels: int = 1
 
            .. note::
              Assumptions added via :func:`~pybitwuzla.Bitwuzla.assume_formula`
@@ -537,7 +545,7 @@ cdef class Bitwuzla:
            Pop context levels.
 
            :param levels: Number of levels to pop.
-           :type levels: int
+           :type levels: int = 1
 
            .. note::
              Assumptions added via :func:`~pybitwuzla.Bitwuzla.assume_formula`
@@ -721,7 +729,7 @@ cdef class Bitwuzla:
            Get the model as a string in format ``fmt``.
 
            :param fmt: Model format. Available formats: "btor", "smt2"
-           :type fmt: str
+           :type fmt: str = "smt2"
 
            :return: String representation of model in format ``fmt``.
            :rtype: str
@@ -740,7 +748,7 @@ cdef class Bitwuzla:
            Dump the current formula as a string in format ``fmt``.
 
            :param fmt: Model format. Available formats: "btor", "smt2"
-           :type fmt: str
+           :type fmt: str = "smt2"
 
            :return: String representation of formula in format ``fmt``.
            :rtype: str
@@ -1281,7 +1289,7 @@ cdef class Bitwuzla:
            :param sort: The sort of the constant.
            :type sort: BitwuzlaSort
            :param symbol: The symbol of the constant.
-           :type symbol: str
+           :type symbol: str or None = None
 
            :return: A term representing the constant.
            :rtype: BitwuzlaTerm
@@ -1318,7 +1326,7 @@ cdef class Bitwuzla:
            :param sort: The sort of the variable.
            :type sort: BitwuzlaSort
            :param symbol: The symbol of the variable.
-           :type symbol: str
+           :type symbol: str or None = None
 
            :return: A term representing the variable.
            :rtype: BitwuzlaTerm
@@ -1332,15 +1340,17 @@ cdef class Bitwuzla:
                                                      sort.ptr(),
                                                      _to_cstr(symbol)))
 
-    def mk_term(self, kind, terms):
-        """mk_term(kind, terms)
+    def mk_term(self, kind, terms, indices = None):
+        """mk_term(kind, terms, indices = None)
 
            Create a term of given kind with the given argument terms.
 
            :param kind: The operator kind.
            :type kind: Kind
-           :param terms: The number of argument terms.
+           :param terms: The argument terms.
            :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
+           :param indices: The argument indices.
+           :type indices: tuple(int, ...) or None = None
 
            :return: A term representing an operation of given kind.
            :rtype: BitwuzlaTerm
@@ -1349,6 +1359,10 @@ cdef class Bitwuzla:
             raise ValueError('Given kind is not a Kind object.')
         if not isinstance(terms, list) and not isinstance(terms, tuple):
             raise ValueError('Expected list or tuple for terms')
+        if indices is not None \
+            and not isinstance(indices, list) \
+            and not isinstance(indices, tuple):
+            raise ValueError('Expected list or tuple for indices')
 
         num_terms = len(terms)
         cdef const bitwuzla_api.BitwuzlaTerm **c_terms =\
@@ -1360,9 +1374,25 @@ cdef class Bitwuzla:
                                  'not of type BitwuzlaTerm'.format(i))
             c_terms[i] = (<BitwuzlaTerm> terms[i]).ptr()
 
+        num_indices = 0
+        if indices is not None:
+            num_indices = len(indices)
+        cdef uint32_t *c_indices =\
+                _alloc_indices_const(num_indices)
+
         term = BitwuzlaTerm(self)
-        term.set(bitwuzla_api.bitwuzla_mk_term(
-                    self.ptr(), kind.value, num_terms, c_terms))
+        if indices is None:
+            term.set(bitwuzla_api.bitwuzla_mk_term(
+                        self.ptr(), kind.value, num_terms, c_terms))
+        else:
+            for i in range(num_indices):
+                if not isinstance(indices[i], int):
+                    raise ValueError('Index at position {} is ' \
+                                     'not of type int'.format(i))
+                c_indices[i] = <uint32_t>indices[i]
+
+            term.set(bitwuzla_api.bitwuzla_mk_term_indexed(
+                        self.ptr(), kind.value, num_terms, c_terms, num_indices, c_indices))
         free(c_terms)
         return term
 

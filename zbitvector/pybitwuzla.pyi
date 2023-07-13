@@ -61,13 +61,13 @@ class Bitwuzla:
         """:return: The copyright information.
         :rtype: str"""
         ...
-    def dump_formula(self, fmt: str) -> str:
+    def dump_formula(self, fmt: str = "smt2") -> str:
         """dump_formula(fmt = "smt2")
 
         Dump the current formula as a string in format ``fmt``.
 
         :param fmt: Model format. Available formats: "btor", "smt2"
-        :type fmt: str
+        :type fmt: str = "smt2"
 
         :return: String representation of formula in format ``fmt``.
         :rtype: str"""
@@ -79,13 +79,13 @@ class Bitwuzla:
         .. seealso::
              :func:`~pybitwuzla.Bitwuzla.assume_formula`."""
         ...
-    def get_model(self, fmt: str) -> str:
+    def get_model(self, fmt: str = "smt2") -> str:
         """get_model(fmt = "smt2")
 
         Get the model as a string in format ``fmt``.
 
         :param fmt: Model format. Available formats: "btor", "smt2"
-        :type fmt: str
+        :type fmt: str = "smt2"
 
         :return: String representation of model in format ``fmt``.
         :rtype: str"""
@@ -255,7 +255,7 @@ class Bitwuzla:
         :return: A term representing the bit-vector value.
         :rtype: BitwuzlaTerm"""
         ...
-    def mk_const(self, sort: BitwuzlaSort, symbol: str) -> BitwuzlaTerm:
+    def mk_const(self, sort: BitwuzlaSort, symbol: str | None = None) -> BitwuzlaTerm:
         """mk_const(sort, symbol = None)
 
         Create a (first-order) constant of given ``sort`` with ``symbol``.
@@ -263,7 +263,7 @@ class Bitwuzla:
         :param sort: The sort of the constant.
         :type sort: BitwuzlaSort
         :param symbol: The symbol of the constant.
-        :type symbol: str
+        :type symbol: str or None = None
 
         :return: A term representing the constant.
         :rtype: BitwuzlaTerm"""
@@ -440,21 +440,26 @@ class Bitwuzla:
         :rtype: BitwuzlaTerm"""
         ...
     def mk_term(
-        self, kind: Kind, terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...]
+        self,
+        kind: Kind,
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...],
+        indices: tuple[int, ...] | None = None,
     ) -> BitwuzlaTerm:
-        """mk_term(kind, terms)
+        """mk_term(kind, terms, indices = None)
 
         Create a term of given kind with the given argument terms.
 
         :param kind: The operator kind.
         :type kind: Kind
-        :param terms: The number of argument terms.
+        :param terms: The argument terms.
         :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
+        :param indices: The argument indices.
+        :type indices: tuple(int, ...) or None = None
 
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
         ...
-    def mk_var(self, sort: BitwuzlaSort, symbol: str) -> BitwuzlaTerm:
+    def mk_var(self, sort: BitwuzlaSort, symbol: str | None = None) -> BitwuzlaTerm:
         """mk_var(sort, symbol = None)
 
         Create a variable of given ``sort`` with ``symbol``.
@@ -462,7 +467,7 @@ class Bitwuzla:
         :param sort: The sort of the variable.
         :type sort: BitwuzlaSort
         :param symbol: The symbol of the variable.
-        :type symbol: str
+        :type symbol: str or None = None
 
         :return: A term representing the variable.
         :rtype: BitwuzlaTerm
@@ -471,13 +476,13 @@ class Bitwuzla:
              This creates a variable to be bound by terms of kind
              :class:`~pybitwuzla.Kind.LAMBDA`."""
         ...
-    def pop(self, levels: int) -> None:
+    def pop(self, levels: int = 1) -> None:
         """pop(levels = 1)
 
         Pop context levels.
 
         :param levels: Number of levels to pop.
-        :type levels: int
+        :type levels: int = 1
 
         .. note::
           Assumptions added via :func:`~pybitwuzla.Bitwuzla.assume_formula`
@@ -488,13 +493,13 @@ class Bitwuzla:
         .. seealso::
             :func:`~pybitwuzla.Bitwuzla.assume_formula`"""
         ...
-    def push(self, levels: int) -> None:
+    def push(self, levels: int = 1) -> None:
         """push(levels = 1)
 
         Push new context levels.
 
         :param levels: Number of context levels to create.
-        :type levels: int
+        :type levels: int = 1
 
         .. note::
           Assumptions added via :func:`~pybitwuzla.Bitwuzla.assume_formula`
@@ -635,13 +640,13 @@ class BitwuzlaSort:
         ...
 
 class BitwuzlaTerm:
-    def dump(self, fmt: str) -> str:
+    def dump(self, fmt: str = "smt2") -> str:
         """dump(fmt = "smt2")
 
         Get string representation of term in format ``fmt``.
 
         :param fmt: Output format. Available formats: "btor", "smt2"
-        :type fmt: str
+        :type fmt: str = "smt2"
 
         :return: String representation of the term in format ``fmt``.
         :rtype: str"""
