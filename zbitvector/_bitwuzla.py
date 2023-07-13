@@ -50,7 +50,7 @@ class Symbolic(abc.ABC):
     def __copy__(self) -> Self:
         return self
 
-    def __deepcopy__(self, memo: Any) -> Self:
+    def __deepcopy__(self, memo: Any, /) -> Self:
         return self
 
     def __repr__(self) -> str:
@@ -177,7 +177,7 @@ class Uint(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(Kind.BV_SHR, self, other)
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
             term = BZLA.mk_term(
                 Kind.BV_ZERO_EXTEND, (self._term,), (other.width - self.width,)
@@ -209,7 +209,7 @@ class Int(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(Kind.BV_ASHR, self, other)
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
             term = BZLA.mk_term(
                 Kind.BV_SIGN_EXTEND, (self._term,), (other.width - self.width,)

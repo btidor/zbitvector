@@ -31,7 +31,7 @@ class Symbolic(abc.ABC):
     def __copy__(self) -> Self:
         raise NotImplementedError
 
-    def __deepcopy__(self, memo: Any) -> Self:
+    def __deepcopy__(self, memo: Any, /) -> Self:
         raise NotImplementedError
 
     def __repr__(self) -> str:
@@ -148,18 +148,18 @@ class Constraint(Symbolic):
         raise NotImplementedError
 
     @overload
-    def ite(self, then: Uint[N], else_: Uint[N]) -> Uint[N]:
+    def ite(self, then: Uint[N], else_: Uint[N], /) -> Uint[N]:
         ...
 
     @overload
-    def ite(self, then: Int[N], else_: Int[N]) -> Int[N]:
+    def ite(self, then: Int[N], else_: Int[N], /) -> Int[N]:
         ...
 
     @overload
-    def ite(self, then: Constraint, else_: Constraint) -> Constraint:
+    def ite(self, then: Constraint, else_: Constraint, /) -> Constraint:
         ...
 
-    def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
+    def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         """
         Perform an if-then-else based on this constraint. The result is `then`
         if the constraint evaluates to `True` and `else_` otherwise.
@@ -396,14 +396,14 @@ class Uint(BitVector[N]):
         raise NotImplementedError
 
     @overload
-    def into(self: Uint[N], other: type[Int[N]]) -> Int[N]:
+    def into(self: Uint[N], other: type[Int[N]], /) -> Int[N]:
         ...
 
     @overload
-    def into(self: Uint[N], other: type[Uint[M]]) -> Uint[M]:
+    def into(self: Uint[N], other: type[Uint[M]], /) -> Uint[M]:
         ...
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         """
         Forcibly convert this bitvector to the given type.
 
@@ -516,14 +516,14 @@ class Int(BitVector[N]):
         raise NotImplementedError
 
     @overload
-    def into(self: Int[N], other: type[Uint[N]]) -> Uint[N]:
+    def into(self: Int[N], other: type[Uint[N]], /) -> Uint[N]:
         ...
 
     @overload
-    def into(self: Int[N], other: type[Int[M]]) -> Int[M]:
+    def into(self: Int[N], other: type[Int[M]], /) -> Int[M]:
         ...
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         """
         Forcibly convert this bitvector to the given type.
 

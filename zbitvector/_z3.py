@@ -48,7 +48,7 @@ class Symbolic(abc.ABC):
     def __copy__(self) -> Self:
         return self
 
-    def __deepcopy__(self, memo: Any) -> Self:
+    def __deepcopy__(self, memo: Any, /) -> Self:
         return self
 
     def __repr__(self) -> str:
@@ -91,7 +91,7 @@ class Constraint(Symbolic):
     def __bool__(self) -> Never:
         raise TypeError("cannot use Constraint in a boolean context")
 
-    def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
+    def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         return then._from_expr(z3.Z3_mk_ite, self, then, else_)
 
 
@@ -174,7 +174,7 @@ class Uint(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(z3.Z3_mk_bvlshr, self, other)
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
             term = z3.Z3_mk_zero_ext(CTX, other.width - self.width, self._term)
         elif self.width > other.width:
@@ -205,7 +205,7 @@ class Int(BitVector[N]):
     def __rshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(z3.Z3_mk_bvashr, self, other)
 
-    def into(self, other: type[BitVector[M]]) -> BitVector[M]:
+    def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
             term = z3.Z3_mk_sign_ext(CTX, other.width - self.width, self._term)
         elif self.width > other.width:
