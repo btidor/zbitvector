@@ -1,3 +1,5 @@
+"""Configuration for pytest. *Not* part of the public API."""
+
 from typing import Any, Dict, Literal
 
 import pytest

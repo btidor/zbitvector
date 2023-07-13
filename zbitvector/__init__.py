@@ -1,7 +1,5 @@
 """zbitvector: an efficient, well-typed interface to the Z3 and Bitwuzla SMT solvers."""
 
-# pyright: reportUnusedImport=false
-
 import os
 from importlib import metadata
 from typing import TYPE_CHECKING
@@ -11,27 +9,30 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"
 
+
+__all__ = ("BitVector", "Constraint", "Int", "Symbolic", "Uint")
+
+
 _solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
-if TYPE_CHECKING or _solver == "dummy":
-    from . import _backend as _zbitvector
-    from ._backend import BitVector as BitVector
-    from ._backend import Constraint as Constraint
-    from ._backend import Int as Int
-    from ._backend import Symbolic as Symbolic
-    from ._backend import Uint as Uint
+
+if _solver == "dummy":
+    from . import _abstract as _backend
 elif _solver == "bitwuzla":
-    from . import _bitwuzla as _zbitvector
-    from ._bitwuzla import BitVector as BitVector
-    from ._bitwuzla import Constraint as Constraint
-    from ._bitwuzla import Int as Int
-    from ._bitwuzla import Symbolic as Symbolic
-    from ._bitwuzla import Uint as Uint
+    from . import _bitwuzla as _backend
 elif _solver == "z3":
-    from . import _z3 as _zbitvector
-    from ._z3 import BitVector as BitVector
-    from ._z3 import Constraint as Constraint
-    from ._z3 import Int as Int
-    from ._z3 import Symbolic as Symbolic
-    from ._z3 import Uint as Uint
+    from . import _z3 as _backend
 else:
     raise ValueError(f"unknown solver: {_solver}")
+
+if TYPE_CHECKING:
+    # Make imports explicit for the type checker.
+    from ._abstract import BitVector as BitVector
+    from ._abstract import Constraint as Constraint
+    from ._abstract import Int as Int
+    from ._abstract import Symbolic as Symbolic
+    from ._abstract import Uint as Uint
+else:
+    for _name in __all__:
+        _member = getattr(_backend, _name)
+        _member.__module__ = __name__
+        globals()[_name] = _member

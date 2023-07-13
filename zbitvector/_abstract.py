@@ -1,3 +1,9 @@
+"""
+Abstract solver backend.
+
+For concrete implementations, see _bitwuzla.py and _z3.py.
+"""
+
 from __future__ import annotations
 
 import abc
@@ -15,6 +21,7 @@ class Symbolic(abc.ABC):
     :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
 
+    # Workaround for https://github.com/microsoft/pyright/issues/5446:
     __hash__: ClassVar[None] = None  # pyright: ignore[reportIncompatibleMethodOverride]
 
     @abc.abstractmethod

@@ -1,3 +1,5 @@
+"""Backend implementation for the Bitwuzla solver."""
+
 from __future__ import annotations
 
 import abc

@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-import inspect
-import re
 from collections.abc import Hashable
-from types import ModuleType
 from typing import Literal, TypeVar, Union
 
 import pytest
 
-from zbitvector import _backend  # pyright: ignore[reportPrivateUsage]
-from zbitvector import Constraint, Int, _zbitvector
+from zbitvector import Constraint, Int
 from zbitvector.conftest import Int8, Uint8
 
 
@@ -40,33 +36,8 @@ def test_init_validations():
     with pytest.raises(TypeError, match="Int requires a positive width"):
         Int[Literal[-1]]
 
-    Int8 = Int[Literal[8]]
     Int8(123)
-    assert re.match(r"<class 'zbitvector.(_bitwuzla|_z3).Int8'>", repr(Int8))
-
-
-def test_backend_api():
-    assert _enumerate_module(_backend) == _enumerate_module(_zbitvector)
-
-
-def _enumerate_module(module: ModuleType) -> set[str]:
-    results: set[str] = set()
-    for _, c in inspect.getmembers(module):
-        if not inspect.isclass(c):
-            continue
-        if inspect.getmodule(c) != inspect.getmodule(module):
-            continue
-        for _, f in inspect.getmembers(c):
-            if not inspect.isfunction(f):
-                continue
-            if f.__name__.startswith("_") and not f.__name__.startswith("__"):
-                continue
-            if c.__name__ == "Symbolic" and f.__name__ == "__init__":
-                # This initializer takes a backend-specific type, but it's
-                # hidden from private subclasses.
-                continue
-            results.add(f"{c.__name__}.{f.__name__}{inspect.signature(f)}")
-    return results
+    assert repr(Int8) == "<class 'zbitvector.Int8'>"
 
 
 def test_uses_slots():

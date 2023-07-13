@@ -1,3 +1,5 @@
+"""Backend implementation for the Z3 solver."""
+
 from __future__ import annotations
 
 import abc
