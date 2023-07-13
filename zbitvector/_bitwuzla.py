@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any, Final, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Generic, Tuple, TypeVar
 
 from typing_extensions import Never, Self
 
@@ -31,8 +31,11 @@ BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
+CACHE: dict[str, Tuple[type, BitwuzlaTerm]] = {}
+
 
 class Symbolic(abc.ABC):
+    _sort: ClassVar[BitwuzlaSort]
     __slots__ = ("_term",)
 
     @abc.abstractmethod
@@ -45,6 +48,21 @@ class Symbolic(abc.ABC):
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
+
+    def _mk_const(self, name: str) -> BitwuzlaTerm:
+        # If we call `mk_const` twice with the same name, Bitwuzla will create
+        # two independent-but-indistinguishable constants. To avoid confusion
+        # and maintain parity with Z3, we cache constants by name.
+        if name not in CACHE:
+            term = BZLA.mk_const(self._sort, name)
+            CACHE[name] = (self.__class__, term)
+        cls, term = CACHE[name]
+        if not isinstance(self, cls):
+            raise ValueError(
+                f'cannot create {self.__class__.__name__}("{name}") '
+                f'because {cls.__name__}("{name}") already exists'
+            )
+        return term
 
     # Symbolic instances are immutable. For performance, don't copy them.
     def __copy__(self) -> Self:
@@ -69,12 +87,12 @@ class Symbolic(abc.ABC):
 
 
 class Constraint(Symbolic):
-    _sort: Final[BitwuzlaSort] = BZLA.mk_bool_sort()
+    _sort: ClassVar[BitwuzlaSort] = BZLA.mk_bool_sort()
     __slots__ = ()
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = BZLA.mk_const(self._sort, value)
+            term = self._mk_const(value)
         else:
             term = BZLA.mk_bv_value(self._sort, int(value))
         super().__init__(term)
@@ -94,18 +112,18 @@ class Constraint(Symbolic):
     def __bool__(self) -> Never:
         raise TypeError("cannot use Constraint in a boolean context")
 
-    def ite(self, then: Symbolic, else_: Symbolic) -> Symbolic:
+    def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         return then._from_expr(Kind.ITE, self, then, else_)
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     width: Final[int]  # type: ignore
-    _sort: Final[BitwuzlaSort]  # type: ignore
+    _sort: ClassVar[BitwuzlaSort]
     __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
         if isinstance(value, str):
-            term = BZLA.mk_const(self._sort, value)
+            term = self._mk_const(value)
         else:
             term = BZLA.mk_bv_value(self._sort, value)
         super().__init__(term)

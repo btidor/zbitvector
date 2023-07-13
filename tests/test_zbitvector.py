@@ -7,7 +7,7 @@ from typing import Literal, TypeVar, Union
 
 import pytest
 
-from zbitvector import Constraint, Int
+from zbitvector import *
 from zbitvector.conftest import Int8, Uint8
 
 
@@ -43,6 +43,13 @@ def test_init_validations():
 def test_uses_slots():
     for cls in (Constraint(True), Uint8(0), Int8(0)):
         assert not hasattr(cls, "__dict__")
+
+
+def test_constants_equal():
+    s = Solver()
+    a, b = Uint8("UCE"), Uint8("UCE")  # the *same* constant
+    s.add(a != b)
+    assert s.check() is False
 
 
 def test_bool():
