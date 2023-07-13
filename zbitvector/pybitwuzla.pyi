@@ -517,7 +517,7 @@ class Bitwuzla:
         .. seealso::
              :func:`~pybitwuzla.Bitwuzla.assume_formula`."""
         ...
-    def set_option(self, opt: Option, value: str | Option) -> None:
+    def set_option(self, opt: Option, value: str | Option | int) -> None:
         """set_option(opt, value)
 
         Set option ``opt`` to ``value``.
@@ -525,7 +525,7 @@ class Bitwuzla:
         :param opt:   Option.
         :type opt:    BitwuzlaOption
         :param value: Option value.
-        :type value:  str or BitwuzlaOption
+        :type value:  str or BitwuzlaOption or int
 
         .. seealso::
              For a list of available options see :class:`~pybitwuzla.Option`"""

@@ -868,7 +868,7 @@ cdef class Bitwuzla:
            :param opt:   Option.
            :type opt:    BitwuzlaOption
            :param value: Option value.
-           :type value:  str or BitwuzlaOption
+           :type value:  str or BitwuzlaOption or int
 
            .. seealso::
                 For a list of available options see :class:`~pybitwuzla.Option`
