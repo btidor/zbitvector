@@ -2,10 +2,7 @@
 name = "zbitvector"
 description = "A well-typed library for symbolic bitvectors"
 readme = "README.md"
-
-# zbitvector is MIT-licensed. However, the binary wheel packages Bitwuzla and
-# its dependencies, which include GMP (LGPLv3) and SymFPU (GPLv3).
-license = { text = "GNU General Public License v3" }
+license = { text = "MIT License" }
 
 dynamic = ["version"]
 
