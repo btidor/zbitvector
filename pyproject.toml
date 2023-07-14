@@ -41,5 +41,6 @@ addopts = "--doctest-modules"
 
 [tool.setuptools]
 packages = ["zbitvector", "zbitvector.pybitwuzla"]
+license-files = ["LICENSE", "THIRDPARTY"]
 
 [tool.setuptools_scm]
