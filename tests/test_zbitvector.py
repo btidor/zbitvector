@@ -1,5 +1,3 @@
-#!/usr/bin/env pytest
-
 from __future__ import annotations
 
 from collections.abc import Hashable
@@ -7,6 +5,7 @@ from typing import Literal, TypeVar, Union
 
 import pytest
 
+# pyright: reportWildcardImportFromLibrary=false
 from zbitvector import *
 from zbitvector.conftest import Int8, Uint8
 
