@@ -1,0 +1,25 @@
+name: release
+on: [workflow_dispatch]
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write  # github release assets
+      id-token: write  # pypi oidc
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: .github/workflows/release.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: wheelhouse/
+          print-hash: true
+          repository-url: https://test.pypi.org/legacy/
