@@ -1,4 +1,14 @@
-package_task:
+sdist_task:
+  container:
+    image: python:latest
+  setup_script:
+    python3 -m pip install build
+  build_script:
+    python3 -m build --sdist --outdir wheelhouse
+  wheels_artifacts:
+    path: "wheelhouse/*"
+
+bdist_task:
   matrix:
     - name: "package / manylinux-x86-64"
       compute_engine_instance: &BUILDER_TEMPLATE
@@ -34,18 +44,19 @@ package_task:
         CIBW_BUILD: "*musllinux*"
     - name: "package / macosx-arm64"
       macos_instance:
-        image: ghcr.io/cirruslabs/macos-monterey-xcode
+        image: ghcr.io/cirruslabs/macos-monterey-xcode:latest
       env:
         CIBW_ARCHS: "arm64"
         CIBW_BEFORE_ALL: "sudo make ci"
     - name: "package / macosx-x86-64"
       macos_instance:
-        image: ghcr.io/cirruslabs/macos-monterey-xcode
+        image: ghcr.io/cirruslabs/macos-monterey-xcode:latest
       env:
         CIBW_ARCHS: "x86_64"
         CIBW_BEFORE_ALL: "sudo arch -x86_64 make ci"
   setup_script:
-    - python3 -m pip install cibuildwheel==2.13.0
+    - git tag -l
+    - python3 -m pip install cibuildwheel==2.14.0
   build_script:
     - python3 -m cibuildwheel
   wheels_artifacts:
