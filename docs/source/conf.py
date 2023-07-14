@@ -6,8 +6,6 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
 project = "zbitvector"
-release = "1.0b1"
-
 
 extensions = [
     "sphinx.ext.autodoc",

@@ -9,6 +9,10 @@ dynamic = ["version"]
 requires-python = ">= 3.8"
 dependencies = ["typing-extensions >= 4.0"]
 
+[project.urls]
+documentation = "https://zbitvector.btidor.dev"
+source = "https://github.com/btidor/zbitvector"
+
 [build-system]
 requires = ["cython", "setuptools", "setuptools_scm[toml]"]
 build-backend = "setuptools.build_meta"
