@@ -17,12 +17,12 @@ docs:
 release:
 	@bash -c '[[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]] || \
 		(echo "usage: make release V=x.y.z"; exit 1)'
-	git tag -s "v$V" -m "tmpdir@v$V"
-	git push tmpdir "v$V"
-	@echo "\n1. Draft release:\n   https://github.com/btidor/tmpdir/releases/tag/v$V"
-	@echo "\n2. Wait for build:\n   https://cirrus-ci.com/github/btidor/tmpdir/v$V"
+	git tag -s "v$V" -m "zbitvector@v$V"
+	git push origin "v$V"
+	@echo "\n1. Draft release:\n   https://github.com/btidor/zbitvector/releases/tag/v$V"
+	@echo "\n2. Wait for build:\n   https://cirrus-ci.com/github/btidor/zbitvector/v$V"
 	@echo "\n3. Check artifacts:\n   https://api.cirrus-ci.com/v1/artifact/build/NNNNNN/wheels.zip"
-	@echo "\n4. Finalize release:\n   https://github.com/btidor/tmpdir/actions/workflows/release.yml"
+	@echo "\n4. Finalize release:\n   https://github.com/btidor/zbitvector/actions/workflows/release.yml"
 
 clean:
 	-rm -r dist/ *.egg-info/

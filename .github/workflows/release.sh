@@ -5,7 +5,7 @@ shopt -s failglob
 
 # Find the latest (annotated) tag and check that it's well-formed
 export RELEASE_TAG=$(git describe --abbrev=0)
-if [[ ! "$(git show $RELEASE_TAG)" =~ "tmpdir@$RELEASE_TAG" ]]; then
+if [[ ! "$(git show $RELEASE_TAG)" =~ "zbitvector@$RELEASE_TAG" ]]; then
     echo "error: tag is missing repository and version"
     exit 1
 fi
@@ -38,7 +38,7 @@ export RESPONSE=$(curl https://api.cirrus-ci.com/graphql --data @- <<EOF
     "variables": {
         "platform": "github",
         "owner": "btidor",
-        "repo": "tmpdir",
+        "repo": "zbitvector",
         "tag": "$RELEASE_TAG"
     }
 }
