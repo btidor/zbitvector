@@ -10,8 +10,8 @@ requires-python = ">= 3.8"
 dependencies = ["typing-extensions >= 4.0"]
 
 [project.urls]
-documentation = "https://zbitvector.btidor.dev"
-source = "https://github.com/btidor/zbitvector"
+"Documentation" = "https://zbitvector.btidor.dev"
+"Source Code" = "https://github.com/btidor/zbitvector"
 
 [build-system]
 requires = ["cython", "setuptools", "setuptools_scm[toml]"]
