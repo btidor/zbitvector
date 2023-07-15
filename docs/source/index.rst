@@ -25,3 +25,9 @@ To build from source instead, first `build Bitwuzla`_ using :code:`./configure
 --shared` and install the library by running :code:`make install`.
 
 .. _build Bitwuzla: https://github.com/bitwuzla/bitwuzla#readme
+
+zbitvector uses the Bitwuzla solver by default, but can be configured to use Z3
+by setting an environment variable::
+
+    pip install z3-solver
+    ZBITVECTOR_SOLVER=z3 python ...
