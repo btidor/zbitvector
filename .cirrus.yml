@@ -1,4 +1,5 @@
 sdist_task:
+  name: "package / sdist"
   container:
     image: python:latest
   setup_script:
