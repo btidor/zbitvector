@@ -10,7 +10,7 @@ except metadata.PackageNotFoundError:
     __version__ = "dev"
 
 
-__all__ = ("BitVector", "Constraint", "Int", "Solver", "Symbolic", "Uint")
+__all__ = ("Array", "BitVector", "Constraint", "Int", "Solver", "Symbolic", "Uint")
 
 
 _solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
@@ -26,6 +26,7 @@ else:
 
 if TYPE_CHECKING:
     # Make imports explicit for the type checker.
+    from ._abstract import Array as Array
     from ._abstract import BitVector as BitVector
     from ._abstract import Constraint as Constraint
     from ._abstract import Int as Int

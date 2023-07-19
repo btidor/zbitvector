@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Generic, Tuple, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Generic, Tuple, TypeVar, Union
 
 from typing_extensions import Never, Self
 
-from ._util import BitVectorMeta
+from ._util import ArrayMeta, BitVectorMeta
 
 try:
     from . import pybitwuzla
@@ -25,7 +25,6 @@ except ImportError:
     import pybitwuzla
     from pybitwuzla import BitwuzlaSort, BitwuzlaTerm, Kind, Option, Result
 
-
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
@@ -42,7 +41,7 @@ class Symbolic(abc.ABC):
 
     @abc.abstractmethod
     def __init__(self, term: BitwuzlaTerm, /) -> None:
-        self._term: Final[BitwuzlaTerm] = term
+        self._term: BitwuzlaTerm = term
 
     @classmethod
     def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
@@ -66,7 +65,6 @@ class Symbolic(abc.ABC):
             )
         return term
 
-    # Symbolic instances are immutable. For performance, don't copy them.
     def __copy__(self) -> Self:
         return self
 
@@ -74,8 +72,13 @@ class Symbolic(abc.ABC):
         return self
 
     def __repr__(self) -> str:
-        smt = self._term.get_symbol() or self._term.dump("smt2")
-        return f"{self.__class__.__name__}(`{smt}`)"
+        if (sym := self._term.get_symbol()) is not None:
+            r = sym
+        elif self._term.is_const_array():
+            r = self._term.get_children()[0].dump("smt2")
+        else:
+            r = self._term.dump("smt2")
+        return f"{self.__class__.__name__}(`{r}`)"
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Self, /
@@ -243,7 +246,59 @@ class Int(BitVector[N]):
         return result
 
 
+K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
+V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+
+
+class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
+    _key: type[K]
+    _value: type[V]
+    _sort: ClassVar[BitwuzlaSort]
+    __slots__ = ()
+
+    def __init__(self, value: V | str, /) -> None:
+        if isinstance(value, str):
+            term = BZLA.mk_const(self._sort, value)
+        else:
+            term = BZLA.mk_const_array(self._sort, value._term)
+        super().__init__(term)
+
+    @classmethod
+    def _make_sort(cls, key: K, value: V) -> BitwuzlaSort:
+        return BZLA.mk_array_sort(
+            key._sort, value._sort  # pyright: ignore[reportPrivateUsage]
+        )
+
+    def __copy__(self) -> Self:
+        result = self.__new__(self.__class__)
+        Symbolic.__init__(result, self._term)
+        return result
+
+    def __deepcopy__(self, memo: Any, /) -> Self:
+        return self.__copy__()
+
+    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise TypeError(f"arrays cannot be compared for equality.")
+
+    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise TypeError(f"arrays cannot be compared for equality.")
+
+    def __getitem__(self, key: K) -> V:
+        return self._value._from_expr(Kind.ARRAY_SELECT, self, key)
+
+    def __setitem__(self, key: K, value: V) -> None:
+        self._term = BZLA.mk_term(
+            Kind.ARRAY_STORE, (self._term, key._term, value._term)
+        )
+
+
 class Solver:
+    __slots__ = ("_assertions",)
+
     def __init__(self) -> None:
         self._assertions: list[Constraint] = []
 

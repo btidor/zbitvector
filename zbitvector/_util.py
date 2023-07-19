@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Literal, cast, get_args, get_origin
+from typing import Any, Literal, TypeVar, Union, cast, get_args, get_origin
 
 from typing_extensions import Self
 
@@ -48,6 +48,54 @@ class BitVectorMeta(abc.ABCMeta):
         if name not in self._ccache:
             sort = cast(Any, self)._make_sort(n)
             cls = type(name, (self,), {"width": n, "_sort": sort, "__slots__": ()})
+            cls.__module__ = self.__module__
+            self._ccache[name] = cls
+        return cast(Self, self._ccache[name])
+
+
+class ArrayMeta(abc.ABCMeta):
+    _ccache: dict[str, type] = {}
+
+    def __getitem__(self, args: Any, /) -> Self:
+        """
+        Arrays work just like BitVectors, except they take two type parameters
+        instead of one.
+        """
+        if (
+            not isinstance(args, tuple)
+            or len(args) != 2  # pyright: ignore[reportUnknownArgumentType]
+        ):
+            raise TypeError(
+                f"unexpected type parameter passed to {self.__name__}[...]; expected a pair of types"
+            )
+
+        k, v = cast("tuple[Any, Any]", args)
+        for a in (k, v):
+            if hasattr(a, "_sort"):
+                continue  # `a` is a usable BitVector
+
+            if get_origin(a) is Union or isinstance(a, TypeVar):
+                # No-op unbound type variables, unions, etc. These kind of
+                # Array[...] can be used in type signatures. Note that trying to
+                # instantiate one will raise an error because _sort is not
+                # defined.
+                return self
+
+            if isinstance(a, BitVectorMeta):
+                # Partially-specified BitVector, e.g. Int[Union[...]]; handle
+                # the same as above.
+                return self
+
+            raise TypeError(
+                f"unsupported type parameter passed to {self.__name__}[...]"
+            )
+
+        name = self.__name__ + "[" + k.__name__ + ", " + v.__name__ + "]"
+        if name not in self._ccache:
+            sort = cast(Any, self)._make_sort(k, v)
+            cls = type(
+                name, (self,), {"_sort": sort, "_key": k, "_value": v, "__slots__": ()}
+            )
             cls.__module__ = self.__module__
             self._ccache[name] = cls
         return cast(Self, self._ccache[name])

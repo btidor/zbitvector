@@ -1,6 +1,6 @@
 **zbitvector** is an efficient, well-typed interface to the Z3 and Bitwuzla SMT
 solvers. It can be used to represent and manipulate symbolic expressions in the
-theory of fixed-sized bitvectors (QF_BV).
+theory of fixed-sized bitvectors and arrays (QF_BVA).
 
 ```py
 import typing

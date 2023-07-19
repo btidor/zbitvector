@@ -1,13 +1,13 @@
 """
 Abstract solver backend.
 
-For concrete implementations, see _bitwuzla.py and _z3.py.
+For specific implementations, see _bitwuzla.py and _z3.py.
 """
 
 from __future__ import annotations
 
 import abc
-from typing import Any, ClassVar, Final, Generic, TypeVar, overload
+from typing import Any, ClassVar, Final, Generic, TypeVar, Union, overload
 
 from typing_extensions import Never, Self
 
@@ -18,7 +18,7 @@ M = TypeVar("M", bound=int)
 class Symbolic(abc.ABC):
     """
     Represents any symbolic expression. This abstract base class is inherited by
-    :class:`Constraint`, :class:`Uint` and :class:`Int`.
+    :class:`Constraint`, :class:`Uint`, :class:`Int` and :class:`Array`.
     """
 
     # Workaround for https://github.com/microsoft/pyright/issues/5446:
@@ -28,6 +28,8 @@ class Symbolic(abc.ABC):
     def __init__(self, term: Any, /) -> None:
         raise NotImplementedError
 
+    # Implementation Note: Symbolic instances (except Array) are immutable. For
+    # performance, don't copy them.
     def __copy__(self) -> Self:
         raise NotImplementedError
 
@@ -78,8 +80,8 @@ class Constraint(Symbolic):
     To create a :class:`Constraint` representing a symbolic variable, pass a
     variable name to the constructor:
 
-    >>> Constraint("A")
-    Constraint(`A`)
+    >>> Constraint("C")
+    Constraint(`C`)
     """
 
     def __init__(self, value: bool | str, /):
@@ -176,6 +178,20 @@ class BitVector(Symbolic, Generic[N]):
     """
     Represents a symbolic N-bit bitvector. This abstract base class is inherited
     by :class:`Uint` and :class:`Int`.
+
+    :SMT-LIB: `theory of fixed-sized bitvectors`
+
+    To create a :class:`BitVector` representing a concrete value, pass an
+    :class:`int` to the constructor:
+
+    >>> Uint8(0)
+    Uint8(`#x00`)
+
+    To create a :class:`BitVector` representing a symbolic variable, pass a
+    variable name to the constructor:
+
+    >>> Int8("I")
+    Int8(`I`)
     """
 
     width: Final[int]  # type: ignore
@@ -544,6 +560,80 @@ class Int(BitVector[N]):
 
         >>> Int64(0xFFFFFFFFFFFFFF01).into(Int8)
         Int8(`#x01`)
+        """
+        raise NotImplementedError
+
+
+K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
+V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+
+
+class Array(Symbolic, Generic[K, V]):
+    """
+    Represents a mutable symbolic array mapping :class:`BitVector` to
+    :class:`BitVector`. Instances do not have a length: they map the full domain
+    to the full range.
+
+    :SMT-LIB: `theory of functional arrays with extensionality`
+
+    To create an :class:`Array` representing a concrete value, pass a
+    :class:`BitVector` to the constructor:
+
+    >>> Array[Uint8, Uint64](Uint64(0))
+    Array[Uint8, Uint64](`#x0000000000000000`)
+
+    To create an :class:`Array` representing a symbolic variable, pass a
+    variable name to the constructor:
+
+    >>> Array[Int8, Int64]("A")
+    Array[Int8, Int64](`A`)
+    """
+
+    def __init__(self, value: V | str, /) -> None:
+        raise NotImplementedError
+
+    # Implementation Note: Array instances are mutable, so make sure not to
+    # inherit the no-copy logic from Symbolic.
+    def __copy__(self) -> Self:
+        raise NotImplementedError
+
+    def __deepcopy__(self, memo: Any, /) -> Self:
+        raise NotImplementedError
+
+    # Implementation Note: Arrays cannot be compared for equality.
+    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise NotImplementedError
+
+    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise NotImplementedError
+
+    def __getitem__(self, key: K) -> V:
+        """
+        Look up the item at index `key`.
+
+        :SMT-LIB: (select self key)
+
+        >>> A = Array[Uint8, Uint64](Uint64(0))
+        >>> A[Uint8(100)]
+        Uint64(`#x0000000000000000`)
+        """
+        raise NotImplementedError
+
+    def __setitem__(self, key: K, value: V) -> None:
+        """
+        Set the item at index `key` to `value`.
+        Look up  `key` in the array.
+
+        :SMT-LIB: (store self key value)
+
+        >>> A = Array[Uint8, Uint64](Uint64(0))
+        >>> A[Uint8(1)] = Uint64(0x1234)
+        >>> A[Uint8(1)]
+        Uint64(`#x0000000000001234`)
         """
         raise NotImplementedError
 

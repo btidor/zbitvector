@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Final, Generic, TypeVar
+from typing import Any, Callable, Final, Generic, TypeVar, Union
 
 import z3
 from typing_extensions import Never, Self
 
-from ._util import BitVectorMeta
+from ._util import ArrayMeta, BitVectorMeta
 
 # pyright: reportUnknownMemberType=false
 # pyright: reportUnknownArgumentType=false
@@ -25,7 +25,7 @@ class Symbolic(abc.ABC):
 
     @abc.abstractmethod
     def __init__(self, term: Any, /) -> None:
-        self._term: Final[Any] = term
+        self._term: Any = term
 
     @classmethod
     def _from_expr(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
@@ -44,7 +44,6 @@ class Symbolic(abc.ABC):
         Symbolic.__init__(result, term)
         return result
 
-    # Symbolic instances are immutable. For performance, don't copy them.
     def __copy__(self) -> Self:
         return self
 
@@ -218,7 +217,71 @@ class Int(BitVector[N]):
         return result
 
 
+K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
+V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+
+
+class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
+    _key: type[K]
+    _value: type[V]
+    _sort: Any
+    __slots__ = ()
+
+    def __init__(self, value: V | str, /) -> None:
+        if isinstance(value, str):
+            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
+        else:
+            self._sort  # for error message consistency
+            term = z3.Z3_mk_const_array(
+                CTX,
+                self._key._sort,  # pyright: ignore[reportPrivateUsage]
+                value._term,
+            )
+        super().__init__(term)
+
+    @classmethod
+    def _make_sort(cls, key: K, value: V) -> Any:
+        return z3.Z3_mk_array_sort(
+            CTX, key._sort, value._sort  # pyright: ignore[reportPrivateUsage]
+        )
+
+    def __copy__(self) -> Self:
+        result = self.__new__(self.__class__)
+        Symbolic.__init__(result, self._term)
+        return result
+
+    def __deepcopy__(self, memo: Any, /) -> Self:
+        return self.__copy__()
+
+    def __repr__(self) -> str:
+        decl = z3.Z3_get_app_decl(CTX, self._term)
+        if z3.Z3_get_decl_kind(CTX, decl) == z3.Z3_OP_CONST_ARRAY:
+            default = z3.Z3_get_app_arg(CTX, self._term, 0)
+            return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, default)}`)"
+        return super().__repr__()
+
+    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise TypeError(f"arrays cannot be compared for equality.")
+
+    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, other: Never, /
+    ) -> Never:
+        raise TypeError(f"arrays cannot be compared for equality.")
+
+    def __getitem__(self, key: K) -> V:
+        return self._value._from_expr(z3.Z3_mk_select, self, key)
+
+    def __setitem__(self, key: K, value: V) -> None:
+        self._term = z3.Z3_simplify(
+            CTX, z3.Z3_mk_store(CTX, self._term, key._term, value._term)
+        )
+
+
 class Solver:
+    __slots__ = ("_solver",)
+
     def __init__(self) -> None:
         self._solver = z3.Z3_mk_solver(CTX)
 

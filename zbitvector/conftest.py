@@ -26,6 +26,7 @@ def pytest_ignore_collect(path: Any) -> bool:
 def setup_doctest(doctest_namespace: Dict[str, Any]) -> None:
     doctest_namespace.update(
         {
+            "Array": Array,
             "Solver": Solver,
             "Constraint": Constraint,
             "Uint8": Uint8,
