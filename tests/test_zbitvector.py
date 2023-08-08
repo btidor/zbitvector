@@ -81,9 +81,27 @@ def test_constants_equal():
     s.add(a != b)
     assert s.check() is False
 
+    with pytest.raises(ValueError, match="already exists"):
+        a, b = Uint8("XCE"), Int8("XCE")
+
+    with pytest.raises(ValueError, match="already exists"):
+        a, b = Uint8("YCE"), Uint64("YCE")
+
+    with pytest.raises(ValueError, match="already exists"):
+        a, b = Constraint("ZCE"), Uint8("ZCE")
+
+    s = Solver()
+    a, b = Array[Uint8, Uint8]("ACE"), Array[Uint8, Uint8]("ACE")
+    s.add(a[Uint8(0)] == Uint8(0))
+    s.add(b[Uint8(0)] == Uint8(2))
+    assert s.check() is False
+
+    with pytest.raises(ValueError, match="already exists"):
+        a, b = Array[Uint8, Uint8]("BCE"), Array[Int8, Int8]("BCE")
+
 
 def test_uses_slots():
-    for cls in (Constraint(True), Uint8(0), Int8(0), Array[Uint8, Uint8]("A")):
+    for cls in (Constraint(True), Uint8(0), Int8(0), Array[Uint8, Uint8](Uint8(0))):
         assert not hasattr(cls, "__dict__")
 
 
@@ -95,14 +113,14 @@ def test_bool():
     if Uint8(0):  # allowed
         pass
 
-    if Array[Uint8, Uint8]("A"):  # allowed
+    if Array[Uint8, Uint8]("BOOLA"):  # allowed
         pass
 
 
 def test_hash():
     assert not isinstance(Constraint(True), Hashable)
     assert not isinstance(Uint8(0), Hashable)
-    assert not isinstance(Array[Uint8, Uint8]("A"), Hashable)
+    assert not isinstance(Array[Uint8, Uint8](Uint8(0)), Hashable)
 
     # Make sure these raise an error both at runtime and from the typechecker:
     with pytest.raises(TypeError, match="unhashable type"):
@@ -110,12 +128,12 @@ def test_hash():
     with pytest.raises(TypeError, match="unhashable type"):
         _ = {Uint8(0): 0}  # pyright: ignore[reportGeneralTypeIssues]
     with pytest.raises(TypeError, match="unhashable type"):
-        _ = {Array[Uint8, Uint8]("A"): 0}  # pyright: ignore[reportGeneralTypeIssues]
+        _ = {Array[Uint8, Uint8]("UHA"): 0}  # pyright: ignore[reportGeneralTypeIssues]
 
 
 def test_array_equality():
-    A = Array[Uint8, Uint8]("A")
-    B = Array[Uint8, Uint8]("B")
+    A = Array[Uint8, Uint8]("EQA")
+    B = Array[Uint8, Uint8]("EQB")
 
     with pytest.raises(TypeError, match="arrays cannot be compared for equality"):
         if A == B:  # type: ignore

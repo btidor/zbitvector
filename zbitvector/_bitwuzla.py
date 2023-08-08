@@ -258,7 +258,7 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
 
     def __init__(self, value: V | str, /) -> None:
         if isinstance(value, str):
-            term = BZLA.mk_const(self._sort, value)
+            term = self._mk_const(value)
         else:
             term = BZLA.mk_const_array(self._sort, value._term)
         super().__init__(term)

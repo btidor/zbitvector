@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Final, Generic, TypeVar, Union
+from typing import Any, Callable, Final, Generic, Tuple, TypeVar, Union
 
 import z3
 from typing_extensions import Never, Self
@@ -19,8 +19,11 @@ CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
+CACHE: dict[str, Tuple[type, Any]] = {}
+
 
 class Symbolic(abc.ABC):
+    _sort: Any
     __slots__ = ("_term",)
 
     @abc.abstractmethod
@@ -43,6 +46,18 @@ class Symbolic(abc.ABC):
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
+
+    def _mk_const(self, name: str) -> Any:
+        if name not in CACHE:
+            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, name), self._sort)
+            CACHE[name] = (self.__class__, term)
+        cls, term = CACHE[name]
+        if not isinstance(self, cls):
+            raise ValueError(
+                f'cannot create {self.__class__.__name__}("{name}") '
+                f'because {cls.__name__}("{name}") already exists'
+            )
+        return term
 
     def __copy__(self) -> Self:
         return self
@@ -70,7 +85,7 @@ class Constraint(Symbolic):
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
+            term = self._mk_const(value)
         else:
             term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         Symbolic.__init__(self, term)
@@ -101,7 +116,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 
     def __init__(self, value: int | str, /) -> None:
         if isinstance(value, str):
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
+            term = self._mk_const(value)
         else:
             term = z3.Z3_mk_numeral(CTX, str(value), self._sort)
         Symbolic.__init__(self, term)
@@ -229,7 +244,7 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
 
     def __init__(self, value: V | str, /) -> None:
         if isinstance(value, str):
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, value), self._sort)
+            term = self._mk_const(value)
         else:
             self._sort  # for error message consistency
             term = z3.Z3_mk_const_array(
