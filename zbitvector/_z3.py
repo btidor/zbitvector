@@ -121,6 +121,15 @@ class Constraint(Symbolic):
     def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         return then._from_expr(z3.Z3_mk_ite, self, then, else_)
 
+    def reveal(self) -> bool | None:
+        kind = z3.Z3_get_decl_kind(CTX, z3.Z3_get_app_decl(CTX, self._term))
+        if kind == z3.Z3_OP_TRUE:
+            return True
+        elif kind == z3.Z3_OP_FALSE:
+            return False
+        else:
+            return None
+
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     width: Final[int]  # type: ignore
@@ -213,6 +222,11 @@ class Uint(BitVector[N]):
         Symbolic.__init__(result, term)
         return result
 
+    def reveal(self) -> int | None:
+        if not z3.Z3_is_numeral_ast(CTX, self._term):
+            return None
+        return int(z3.Z3_get_numeral_string(CTX, self._term))
+
 
 class Int(BitVector[N]):
     __slots__ = ()
@@ -243,6 +257,14 @@ class Int(BitVector[N]):
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
+
+    def reveal(self) -> int | None:
+        if not z3.Z3_is_numeral_ast(CTX, self._term):
+            return None
+        r = int(z3.Z3_get_numeral_string(CTX, self._term))
+        if r & (1 << (self.width - 1)) == 0:
+            return r
+        return r - (1 << self.width)
 
 
 K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])

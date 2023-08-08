@@ -15,6 +15,12 @@
 
 ::
 
+    ## Simplification
+    (Uint8(2) + Uint8(3)).reveal()
+    # => 5
+
+::
+
     ## Solving
     s = Solver()
     s.add(Uint8("X") + Uint8(1) == Uint8(0))

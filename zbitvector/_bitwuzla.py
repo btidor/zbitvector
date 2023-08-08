@@ -38,6 +38,7 @@ except ImportError:
 
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.INCREMENTAL, True)
+BZLA.set_option(Option.PRODUCE_MODELS, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 
 N = TypeVar("N", bound=int)
@@ -134,6 +135,12 @@ class Constraint(Symbolic):
     def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         return then._from_expr(Kind.ITE, self, then, else_)
 
+    def reveal(self) -> bool | None:
+        if not self._term.is_bv_value():
+            return None
+        assert BZLA.check_sat() == Result.SAT
+        return bool(int(BZLA.get_value_str(self._term), 2))
+
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     width: Final[int]  # type: ignore
@@ -227,6 +234,12 @@ class Uint(BitVector[N]):
         Symbolic.__init__(result, term)
         return result
 
+    def reveal(self) -> int | None:
+        if not self._term.is_bv_value():
+            return None
+        assert BZLA.check_sat() == Result.SAT
+        return int(BZLA.get_value_str(self._term), 2)
+
 
 class Int(BitVector[N]):
     __slots__ = ()
@@ -258,6 +271,15 @@ class Int(BitVector[N]):
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
+
+    def reveal(self) -> int | None:
+        if not self._term.is_bv_value():
+            return None
+        assert BZLA.check_sat() == Result.SAT
+        r = int(BZLA.get_value_str(self._term), 2)
+        if r & (1 << (self.width - 1)) == 0:
+            return r
+        return r - (1 << self.width)
 
 
 K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])

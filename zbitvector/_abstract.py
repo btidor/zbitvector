@@ -173,6 +173,20 @@ class Constraint(Symbolic):
         """
         raise NotImplementedError
 
+    def reveal(self) -> bool | None:
+        """
+        Reveal the simplified value of this constraint *without* invoking the
+        solver. If the constraint does not simplify to a constant literal,
+        returns `None`.
+
+        >>> (Constraint("C") | Constraint(True)).reveal()
+        True
+
+        >>> (Constraint("C") | Constraint(False)).reveal() is None
+        True
+        """
+        raise NotImplementedError
+
 
 class BitVector(Symbolic, Generic[N]):
     """
@@ -443,6 +457,20 @@ class Uint(BitVector[N]):
         """
         raise NotImplementedError
 
+    def reveal(self) -> int | None:
+        """
+        Reveal the simplified value of this constraint *without* invoking the
+        solver. If the constraint does not simplify to a constant literal,
+        returns `None`.
+
+        >>> (Uint8(2) + Uint8(3)).reveal()
+        5
+
+        >>> (Uint8("X") + Uint8(1)).reveal() is None
+        True
+        """
+        raise NotImplementedError
+
 
 class Int(BitVector[N]):
     """Represents an N-bit signed integer in two's complement form."""
@@ -560,6 +588,20 @@ class Int(BitVector[N]):
 
         >>> Int64(0xFFFFFFFFFFFFFF01).into(Int8)
         Int8(`#x01`)
+        """
+        raise NotImplementedError
+
+    def reveal(self) -> int | None:
+        """
+        Reveal the simplified value of this constraint *without* invoking the
+        solver. If the constraint does not simplify to a constant literal,
+        returns `None`.
+
+        >>> (Int8(2) - Int8(3)).reveal()
+        -1
+
+        >>> (Int8("Y") + Int8(1)).reveal() is None
+        True
         """
         raise NotImplementedError
 
