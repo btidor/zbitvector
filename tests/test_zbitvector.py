@@ -92,8 +92,7 @@ def test_constants_equal():
 
     s = Solver()
     a, b = Array[Uint8, Uint8]("ACE"), Array[Uint8, Uint8]("ACE")
-    s.add(a[Uint8(0)] == Uint8(0))
-    s.add(b[Uint8(0)] == Uint8(2))
+    s.add(a[Uint8(0)] != b[Uint8(0)])
     assert s.check() is False
 
     with pytest.raises(ValueError, match="already exists"):

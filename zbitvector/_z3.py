@@ -22,6 +22,23 @@ M = TypeVar("M", bound=int)
 CACHE: Dict[str, Tuple[type, Any]] = {}
 
 
+def _mk_const(instance: Symbolic | Array[K, V], name: str) -> Any:
+    if name not in CACHE:
+        term = z3.Z3_mk_const(
+            CTX,
+            z3.Z3_mk_string_symbol(CTX, name),
+            instance._sort,  # pyright: ignore[reportPrivateUsage]
+        )
+        CACHE[name] = (instance.__class__, term)
+    cls, term = CACHE[name]
+    if not isinstance(instance, cls):
+        raise ValueError(
+            f'cannot create {instance.__class__.__name__}("{name}") '
+            f'because {cls.__name__}("{name}") already exists'
+        )
+    return term
+
+
 class Symbolic(abc.ABC):
     _sort: Any
     __slots__ = ("_term",)
@@ -31,33 +48,29 @@ class Symbolic(abc.ABC):
         self._term: Any = term
 
     @classmethod
-    def _from_expr(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
-        term = kind(CTX, *(s._term for s in syms))
+    def _from_expr(
+        cls, kind: Callable[..., Any], *syms: Symbolic | Array[K, V]
+    ) -> Self:
+        term = kind(
+            CTX, *(s._term for s in syms)  # pyright: ignore[reportPrivateUsage]
+        )
         term = z3.Z3_simplify(CTX, term)
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
 
     @classmethod
-    def _from_expr_tuple(cls, kind: Callable[..., Any], *syms: Symbolic) -> Self:
-        args = (z3.Ast * len(syms))(*(s._term for s in syms))
+    def _from_expr_tuple(
+        cls, kind: Callable[..., Any], *syms: Symbolic | Array[K, V]
+    ) -> Self:
+        args = (z3.Ast * len(syms))(
+            *(s._term for s in syms)  # pyright: ignore[reportPrivateUsage]
+        )
         term = kind(CTX, len(syms), args)
         term = z3.Z3_simplify(CTX, term)
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
-
-    def _mk_const(self, name: str) -> Any:
-        if name not in CACHE:
-            term = z3.Z3_mk_const(CTX, z3.Z3_mk_string_symbol(CTX, name), self._sort)
-            CACHE[name] = (self.__class__, term)
-        cls, term = CACHE[name]
-        if not isinstance(self, cls):
-            raise ValueError(
-                f'cannot create {self.__class__.__name__}("{name}") '
-                f'because {cls.__name__}("{name}") already exists'
-            )
-        return term
 
     def __copy__(self) -> Self:
         return self
@@ -85,7 +98,7 @@ class Constraint(Symbolic):
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
             term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         Symbolic.__init__(self, term)
@@ -116,7 +129,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 
     def __init__(self, value: int | str, /) -> None:
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
             term = z3.Z3_mk_numeral(CTX, str(value), self._sort)
         Symbolic.__init__(self, term)
@@ -236,23 +249,21 @@ K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
 V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
 
 
-class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
+class Array(Generic[K, V], metaclass=ArrayMeta):
     _key: type[K]
     _value: type[V]
     _sort: Any
-    __slots__ = ()
+    __slots__ = ("_term",)
 
     def __init__(self, value: V | str, /) -> None:
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
             self._sort  # for error message consistency
             term = z3.Z3_mk_const_array(
-                CTX,
-                self._key._sort,  # pyright: ignore[reportPrivateUsage]
-                value._term,
+                CTX, self._key._sort, value._term  # pyright: ignore[reportPrivateUsage]
             )
-        super().__init__(term)
+        self._term = term
 
     @classmethod
     def _make_sort(cls, key: K, value: V) -> Any:
@@ -262,18 +273,18 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
 
     def __copy__(self) -> Self:
         result = self.__new__(self.__class__)
-        Symbolic.__init__(result, self._term)
+        result._term = self._term
         return result
 
     def __deepcopy__(self, memo: Any, /) -> Self:
         return self.__copy__()
 
     def __repr__(self) -> str:
+        render = self._term
         decl = z3.Z3_get_app_decl(CTX, self._term)
         if z3.Z3_get_decl_kind(CTX, decl) == z3.Z3_OP_CONST_ARRAY:
-            default = z3.Z3_get_app_arg(CTX, self._term, 0)
-            return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, default)}`)"
-        return super().__repr__()
+            render = z3.Z3_get_app_arg(CTX, self._term, 0)
+        return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, render)}`)"
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
@@ -286,11 +297,19 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
         raise TypeError(f"arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:
-        return self._value._from_expr(z3.Z3_mk_select, self, key)
+        return self._value._from_expr(  # pyright: ignore[reportPrivateUsage]
+            z3.Z3_mk_select, self, key
+        )
 
     def __setitem__(self, key: K, value: V) -> None:
         self._term = z3.Z3_simplify(
-            CTX, z3.Z3_mk_store(CTX, self._term, key._term, value._term)
+            CTX,
+            z3.Z3_mk_store(
+                CTX,
+                self._term,
+                key._term,  # pyright: ignore[reportPrivateUsage]
+                value._term,  # pyright: ignore[reportPrivateUsage]
+            ),
         )
 
 

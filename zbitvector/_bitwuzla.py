@@ -46,6 +46,24 @@ M = TypeVar("M", bound=int)
 CACHE: Dict[str, Tuple[type, BitwuzlaTerm]] = {}
 
 
+def _mk_const(instance: Symbolic | Array[K, V], name: str) -> BitwuzlaTerm:
+    # If we call `mk_const` twice with the same name, Bitwuzla will create two
+    # independent-but-indistinguishable constants. To avoid confusion and
+    # maintain parity with Z3, we cache constants by name.
+    if name not in CACHE:
+        term = BZLA.mk_const(
+            instance._sort, name  # pyright: ignore[reportPrivateUsage]
+        )
+        CACHE[name] = (instance.__class__, term)
+    cls, term = CACHE[name]
+    if not isinstance(instance, cls):
+        raise ValueError(
+            f'cannot create {instance.__class__.__name__}("{name}") '
+            f'because {cls.__name__}("{name}") already exists'
+        )
+    return term
+
+
 class Symbolic(abc.ABC):
     _sort: ClassVar[BitwuzlaSort]
     __slots__ = ("_term",)
@@ -55,26 +73,13 @@ class Symbolic(abc.ABC):
         self._term: BitwuzlaTerm = term
 
     @classmethod
-    def _from_expr(cls, kind: Kind, *syms: Symbolic) -> Self:
-        term = BZLA.mk_term(kind, tuple(s._term for s in syms))
+    def _from_expr(cls, kind: Kind, *syms: Symbolic | Array[K, V]) -> Self:
+        term = BZLA.mk_term(
+            kind, tuple(s._term for s in syms)  # pyright: ignore[reportPrivateUsage]
+        )
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
         return result
-
-    def _mk_const(self, name: str) -> BitwuzlaTerm:
-        # If we call `mk_const` twice with the same name, Bitwuzla will create
-        # two independent-but-indistinguishable constants. To avoid confusion
-        # and maintain parity with Z3, we cache constants by name.
-        if name not in CACHE:
-            term = BZLA.mk_const(self._sort, name)
-            CACHE[name] = (self.__class__, term)
-        cls, term = CACHE[name]
-        if not isinstance(self, cls):
-            raise ValueError(
-                f'cannot create {self.__class__.__name__}("{name}") '
-                f'because {cls.__name__}("{name}") already exists'
-            )
-        return term
 
     def __copy__(self) -> Self:
         return self
@@ -85,8 +90,6 @@ class Symbolic(abc.ABC):
     def __repr__(self) -> str:
         if (sym := self._term.get_symbol()) is not None:
             r = sym
-        elif self._term.is_const_array():
-            r = self._term.get_children()[0].dump("smt2")
         else:
             r = self._term.dump("smt2")
         return f"{self.__class__.__name__}(`{r}`)"
@@ -108,7 +111,7 @@ class Constraint(Symbolic):
 
     def __init__(self, value: bool | str, /):
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
             term = BZLA.mk_bv_value(self._sort, int(value))
         super().__init__(term)
@@ -139,7 +142,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 
     def __init__(self, value: int | str, /) -> None:
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
             term = BZLA.mk_bv_value(self._sort, value)
         super().__init__(term)
@@ -261,18 +264,20 @@ K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
 V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
 
 
-class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
+class Array(Generic[K, V], metaclass=ArrayMeta):
     _key: type[K]
     _value: type[V]
     _sort: ClassVar[BitwuzlaSort]
-    __slots__ = ()
+    __slots__ = ("_term",)
 
     def __init__(self, value: V | str, /) -> None:
         if isinstance(value, str):
-            term = self._mk_const(value)
+            term = _mk_const(self, value)
         else:
-            term = BZLA.mk_const_array(self._sort, value._term)
-        super().__init__(term)
+            term = BZLA.mk_const_array(
+                self._sort, value._term  # pyright: ignore[reportPrivateUsage]
+            )
+        self._term: BitwuzlaTerm = term
 
     @classmethod
     def _make_sort(cls, key: K, value: V) -> BitwuzlaSort:
@@ -282,11 +287,20 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
 
     def __copy__(self) -> Self:
         result = self.__new__(self.__class__)
-        Symbolic.__init__(result, self._term)
+        result._term = self._term
         return result
 
     def __deepcopy__(self, memo: Any, /) -> Self:
         return self.__copy__()
+
+    def __repr__(self) -> str:
+        if (sym := self._term.get_symbol()) is not None:
+            r = sym
+        elif self._term.is_const_array():
+            r = self._term.get_children()[0].dump("smt2")
+        else:
+            r = self._term.dump("smt2")
+        return f"{self.__class__.__name__}(`{r}`)"
 
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
@@ -299,11 +313,14 @@ class Array(Symbolic, Generic[K, V], metaclass=ArrayMeta):
         raise TypeError(f"arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:
-        return self._value._from_expr(Kind.ARRAY_SELECT, self, key)
+        return self._value._from_expr(  # pyright: ignore[reportPrivateUsage]
+            Kind.ARRAY_SELECT, self, key
+        )
 
     def __setitem__(self, key: K, value: V) -> None:
         self._term = BZLA.mk_term(
-            Kind.ARRAY_STORE, (self._term, key._term, value._term)
+            Kind.ARRAY_STORE,
+            (self._term, key._term, value._term),  # pyright: ignore[reportPrivateUsage]
         )
 
 

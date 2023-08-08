@@ -17,8 +17,8 @@ M = TypeVar("M", bound=int)
 
 class Symbolic(abc.ABC):
     """
-    Represents any symbolic expression. This abstract base class is inherited by
-    :class:`Constraint`, :class:`Uint`, :class:`Int` and :class:`Array`.
+    Represents an immutable symbolic value. This abstract base class is
+    inherited by :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
 
     # Workaround for https://github.com/microsoft/pyright/issues/5446:
@@ -28,8 +28,8 @@ class Symbolic(abc.ABC):
     def __init__(self, term: Any, /) -> None:
         raise NotImplementedError
 
-    # Implementation Note: Symbolic instances (except Array) are immutable. For
-    # performance, don't copy them.
+    # Implementation Note: Symbolic instances are immutable. For performance,
+    # don't copy them.
     def __copy__(self) -> Self:
         raise NotImplementedError
 
@@ -568,13 +568,13 @@ K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
 V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
 
 
-class Array(Symbolic, Generic[K, V]):
+class Array(Generic[K, V]):
     """
     Represents a mutable symbolic array mapping :class:`BitVector` to
     :class:`BitVector`. Instances do not have a length: they map the full domain
     to the full range.
 
-    :SMT-LIB: `theory of functional arrays with extensionality`
+    :SMT-LIB: `theory of functional arrays`
 
     To create an :class:`Array` representing a concrete value, pass a
     :class:`BitVector` to the constructor:
@@ -589,15 +589,18 @@ class Array(Symbolic, Generic[K, V]):
     Array[Int8, Int64](`A`)
     """
 
+    __hash__: ClassVar[None] = None  # pyright: ignore[reportIncompatibleMethodOverride]
+
     def __init__(self, value: V | str, /) -> None:
         raise NotImplementedError
 
-    # Implementation Note: Array instances are mutable, so make sure not to
-    # inherit the no-copy logic from Symbolic.
     def __copy__(self) -> Self:
         raise NotImplementedError
 
     def __deepcopy__(self, memo: Any, /) -> Self:
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
         raise NotImplementedError
 
     # Implementation Note: Arrays cannot be compared for equality.
@@ -626,7 +629,6 @@ class Array(Symbolic, Generic[K, V]):
     def __setitem__(self, key: K, value: V) -> None:
         """
         Set the item at index `key` to `value`.
-        Look up  `key` in the array.
 
         :SMT-LIB: (store self key value)
 

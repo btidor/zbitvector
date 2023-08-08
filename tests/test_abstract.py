@@ -11,6 +11,17 @@ def test_abstract():
     assert _enumerate_module(zbitvector._abstract) == _enumerate_module(zbitvector)
 
 
+def test_inheritance():
+    assert issubclass(zbitvector.Constraint, zbitvector.Symbolic)
+    assert not issubclass(zbitvector.Constraint, zbitvector.BitVector)
+    assert issubclass(zbitvector.Uint, zbitvector.Symbolic)
+    assert issubclass(zbitvector.Uint, zbitvector.BitVector)
+    assert issubclass(zbitvector.Int, zbitvector.Symbolic)
+    assert issubclass(zbitvector.Int, zbitvector.BitVector)
+    assert not issubclass(zbitvector.Array, zbitvector.Symbolic)
+    assert not issubclass(zbitvector.Array, zbitvector.BitVector)
+
+
 def _enumerate_module(module: ModuleType) -> set[str]:
     results: set[str] = set()
     for name in zbitvector.__all__:
