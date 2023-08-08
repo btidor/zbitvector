@@ -14,6 +14,9 @@ def munge(expr: str) -> str:
     expr = re.sub(r"(list|tuple|dict)([^(])", r"\1[Any]\2", expr)
     expr = re.sub(r"(list|tuple|dict)\(([^)]+)\)", r"\1[\2]", expr)
     expr = expr.replace(" or ", " | ")
+    expr = expr.replace("dict", "Dict")
+    expr = expr.replace("list", "List")
+    expr = expr.replace("tuple", "Tuple")
     expr = expr.replace("uint32_t", "int")
     expr = expr.replace("pybitwuzla.", "")
     expr = expr.replace("BitwuzlaOption", "Option")
@@ -23,7 +26,7 @@ def munge(expr: str) -> str:
 print("from __future__ import annotations")
 print()
 print("from enum import Enum")
-print("from typing import Any")
+print("from typing import Any, Dict, List, Tuple")
 print()
 
 for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
@@ -46,9 +49,7 @@ for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
         print(f"class {name}({', '.join(parents)}):")
         printed = False
         for name, member in inspect.getmembers(topic):
-            if "__objclass__" not in dir(member):
-                continue
-            if member.__objclass__ != topic:
+            if "__objclass__" in dir(member) and member.__objclass__ != topic:
                 continue
             if member.__doc__ is None:
                 continue

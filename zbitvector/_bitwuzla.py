@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Any, ClassVar, Final, Generic, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Final,
+    Generic,
+    List,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import Never, Self
 
@@ -32,7 +43,7 @@ BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
-CACHE: dict[str, Tuple[type, BitwuzlaTerm]] = {}
+CACHE: Dict[str, Tuple[type, BitwuzlaTerm]] = {}
 
 
 class Symbolic(abc.ABC):
@@ -300,7 +311,7 @@ class Solver:
     __slots__ = ("_assertions",)
 
     def __init__(self) -> None:
-        self._assertions: list[Constraint] = []
+        self._assertions: List[Constraint] = []
 
     def add(self, assertion: Constraint, /) -> None:
         self._assertions.append(assertion)

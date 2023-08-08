@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Literal, TypeVar, Union, cast, get_args, get_origin
+from typing import Any, Dict, Literal, Tuple, TypeVar, Union, cast, get_args, get_origin
 
 from typing_extensions import Self
 
 
 class BitVectorMeta(abc.ABCMeta):
-    _ccache: dict[str, type] = {}
+    _ccache: Dict[str, type] = {}
 
     def __getitem__(self, N: Any, /) -> Self:
         """
@@ -54,7 +54,7 @@ class BitVectorMeta(abc.ABCMeta):
 
 
 class ArrayMeta(abc.ABCMeta):
-    _ccache: dict[str, type] = {}
+    _ccache: Dict[str, type] = {}
 
     def __getitem__(self, args: Any, /) -> Self:
         """
@@ -69,7 +69,7 @@ class ArrayMeta(abc.ABCMeta):
                 f"unexpected type parameter passed to {self.__name__}[...]; expected a pair of types"
             )
 
-        k, v = cast("tuple[Any, Any]", args)
+        k, v = cast("Tuple[Any, Any]", args)
         for a in (k, v):
             if hasattr(a, "_sort"):
                 continue  # `a` is a usable BitVector
