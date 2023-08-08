@@ -7,29 +7,32 @@
     :start-after: ```py
     :end-before: ```
 
-::
-
-    ## Arrays
-    A = Array[Uint8, Uint64](Uint64(0))
-    A[Uint8(1)] = Uint64(2)
-
-::
-
-    ## Simplification
-    (Uint8(2) + Uint8(3)).reveal()
-    # => 5
-
-::
-
-    ## Solving
-    s = Solver()
-    s.add(Uint8("X") + Uint8(1) == Uint8(0))
-    assert s.check()
-
 .. toctree::
     :maxdepth: 2
 
     api
+
+
+Features
+========
+
+- Arrays::
+
+    >>> A = Array[Uint8, Uint64](Uint64(0))
+    >>> A[Uint8(1)] = Uint64(2)
+
+- Simplification::
+
+    >>> (Uint8(2) + Uint8(3)).reveal()
+    5
+
+- Solving::
+
+    >>> s = Solver()
+    >>> s.add(Uint8("X") + Uint8(1) == Uint8(0))
+    >>> s.check()
+    True
+
 
 Installation
 ============
