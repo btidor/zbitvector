@@ -6,8 +6,8 @@
 
 3. Avoid using array.array, which is incompatible with PyPy.
 
---- pybitwuzla.pyx	2023-07-13 04:05:15.045748329 +0000
-+++ pybitwuzla.pyx	2023-07-13 04:05:39.443913175 +0000
+--- pybitwuzla.pyx	2023-08-08 22:35:17.590607391 +0000
++++ pybitwuzla.pyx	2023-08-08 22:35:01.934545302 +0000
 @@ -20,9 +20,7 @@
  from libc.stdint cimport int32_t, uint32_t, uint64_t
  from libcpp cimport bool as cbool
@@ -140,7 +140,24 @@
 
             .. note::
               Assumptions added via :func:`~pybitwuzla.Bitwuzla.assume_formula`
-@@ -780,7 +729,7 @@
+@@ -691,6 +640,7 @@
+            Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
+            returned `~pybitwuzla.Result.SAT`.
+
++           :type term: BitwuzlaTerm
+            :return: Term representing the model value of `term`.
+            :rtype: BitwuzlaTerm
+         """
+@@ -705,6 +655,8 @@
+            Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
+            returned :class:`~pybitwuzla.Result.SAT`.
+
++           :type term: BitwuzlaTerm
++           :rtype: Any
+            :return:
+                - arrays: dictionary mapping indices to values
+                - bit-vectors: bit string
+@@ -780,7 +732,7 @@
             Get the model as a string in format ``fmt``.
 
             :param fmt: Model format. Available formats: "btor", "smt2"
@@ -149,7 +166,7 @@
 
             :return: String representation of model in format ``fmt``.
             :rtype: str
-@@ -799,7 +748,7 @@
+@@ -799,7 +751,7 @@
             Dump the current formula as a string in format ``fmt``.
 
             :param fmt: Model format. Available formats: "btor", "smt2"
@@ -158,7 +175,7 @@
 
             :return: String representation of formula in format ``fmt``.
             :rtype: str
-@@ -919,6 +868,7 @@
+@@ -919,6 +871,7 @@
             :param opt:   Option.
             :type opt:    BitwuzlaOption
             :param value: Option value.
@@ -166,7 +183,7 @@
 
             .. seealso::
                  For a list of available options see :class:`~pybitwuzla.Option`
-@@ -1339,7 +1289,7 @@
+@@ -1339,7 +1292,7 @@
             :param sort: The sort of the constant.
             :type sort: BitwuzlaSort
             :param symbol: The symbol of the constant.
@@ -175,7 +192,7 @@
 
             :return: A term representing the constant.
             :rtype: BitwuzlaTerm
-@@ -1376,7 +1326,7 @@
+@@ -1376,7 +1329,7 @@
             :param sort: The sort of the variable.
             :type sort: BitwuzlaSort
             :param symbol: The symbol of the variable.
@@ -184,7 +201,7 @@
 
             :return: A term representing the variable.
             :rtype: BitwuzlaTerm
-@@ -1397,10 +1347,10 @@
+@@ -1397,10 +1350,10 @@
 
             :param kind: The operator kind.
             :type kind: Kind
@@ -199,7 +216,7 @@
 
             :return: A term representing an operation of given kind.
             :rtype: BitwuzlaTerm
-@@ -1424,21 +1374,25 @@
+@@ -1424,21 +1377,25 @@
                                   'not of type BitwuzlaTerm'.format(i))
              c_terms[i] = (<BitwuzlaTerm> terms[i]).ptr()
 
@@ -237,7 +254,7 @@
          free(c_terms)
          return term
 
-@@ -1450,7 +1404,7 @@
+@@ -1450,7 +1407,7 @@
             substitutions in ``subst_map``.
 
             :param terms: List of terms to apply substitutions.

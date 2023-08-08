@@ -122,7 +122,7 @@ class Bitwuzla:
         :return:  list of unsatisfiable assertions
         :rtype:   list(BitwuzlaTerm)"""
         ...
-    def get_value(self) -> BitwuzlaTerm:
+    def get_value(self, term: BitwuzlaTerm) -> BitwuzlaTerm:
         """get_value(term)
 
         Get model value of term.
@@ -130,10 +130,11 @@ class Bitwuzla:
         Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
         returned `~pybitwuzla.Result.SAT`.
 
+        :type term: BitwuzlaTerm
         :return: Term representing the model value of `term`.
         :rtype: BitwuzlaTerm"""
         ...
-    def get_value_str(self) -> None:
+    def get_value_str(self, term: BitwuzlaTerm) -> Any:
         """get_value_str(term)
 
         Get string representation of model value of a `term`.
@@ -141,6 +142,8 @@ class Bitwuzla:
         Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
         returned :class:`~pybitwuzla.Result.SAT`.
 
+        :type term: BitwuzlaTerm
+        :rtype: Any
         :return:
             - arrays: dictionary mapping indices to values
             - bit-vectors: bit string

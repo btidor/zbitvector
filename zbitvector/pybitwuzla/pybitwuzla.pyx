@@ -640,6 +640,7 @@ cdef class Bitwuzla:
            Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
            returned `~pybitwuzla.Result.SAT`.
 
+           :type term: BitwuzlaTerm
            :return: Term representing the model value of `term`.
            :rtype: BitwuzlaTerm
         """
@@ -654,6 +655,8 @@ cdef class Bitwuzla:
            Requires that the last :func:`~pybitwuzla.Bitwuzla.check_sat` call
            returned :class:`~pybitwuzla.Result.SAT`.
 
+           :type term: BitwuzlaTerm
+           :rtype: Any
            :return:
                - arrays: dictionary mapping indices to values
                - bit-vectors: bit string
