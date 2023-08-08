@@ -570,20 +570,20 @@ V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
 
 class Array(Generic[K, V]):
     """
-    Represents a mutable symbolic array mapping :class:`BitVector` to
-    :class:`BitVector`. Instances do not have a length: they map the full domain
-    to the full range.
+    Represents a mutable symbolic array mapping a :class:`BitVector` to a
+    :class:`BitVector`. Arrays do not have a length: they map the full domain to
+    the full range.
 
     :SMT-LIB: `theory of functional arrays`
 
-    To create an :class:`Array` representing a concrete value, pass a
-    :class:`BitVector` to the constructor:
+    To create an :class:`Array` where all keys map to a single default value,
+    pass a :class:`BitVector` to the constructor:
 
     >>> Array[Uint8, Uint64](Uint64(0))
     Array[Uint8, Uint64](`#x0000000000000000`)
 
-    To create an :class:`Array` representing a symbolic variable, pass a
-    variable name to the constructor:
+    To create a fully unconstrained :class:`Array`, pass a variable name to the
+    constructor:
 
     >>> Array[Int8, Int64]("A")
     Array[Int8, Int64](`A`)

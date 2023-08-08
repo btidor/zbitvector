@@ -9,10 +9,10 @@ import zbitvector
 Uint8 = zbitvector.Uint[typing.Literal[8]]
 Uint64 = zbitvector.Uint[typing.Literal[64]]
 
-Uint64("A") + Uint64(1)
-# => Uint64(`(bvadd A #x01)`)
+Uint64("X") + Uint64(1)
+# => Uint64(`(bvadd X #x01)`)
 
-Uint64("A") + Uint8(1)
+Uint64("X") + Uint8(1)
 # fails to typecheck
 ```
 

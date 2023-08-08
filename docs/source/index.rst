@@ -7,11 +7,23 @@
     :start-after: ```py
     :end-before: ```
 
+::
+
+    ## Arrays
+    A = Array[Uint8, Uint64](Uint64(0))
+    A[Uint8(1)] = Uint64(2)
+
+::
+
+    ## Solving
+    s = Solver()
+    s.add(Uint8("X") + Uint8(1) == Uint8(0))
+    assert s.check()
+
 .. toctree::
     :maxdepth: 2
 
     api
-
 
 Installation
 ============
