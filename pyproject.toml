@@ -23,8 +23,8 @@ test-requires = ["pytest", "z3-solver"]
 test-command = """ \
     pytest --import-mode=append {project}/tests && \
     pytest --pyargs --doctest-modules zbitvector && \
-    ZBITVECTOR_BACKEND=z3 pytest --import-mode=append {project}/tests && \
-    ZBITVECTOR_BACKEND=z3 pytest --pyargs --doctest-modules zbitvector \
+    ZBITVECTOR_SOLVER=z3 pytest --import-mode=append {project}/tests && \
+    ZBITVECTOR_SOLVER=z3 pytest --pyargs --doctest-modules zbitvector \
 """
 
 # Z3 doesn't distribute pre-built binaries for these platforms
