@@ -33,6 +33,11 @@ Features
     >>> s.check()
     True
 
+- Model Evaluation::
+
+    >>> s.evaluate(Uint8("X"))
+    255
+
 
 Installation
 ============

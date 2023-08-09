@@ -336,25 +336,52 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
 
 
 class Solver:
-    __slots__ = ("_solver",)
+    __slots__ = ("_solver", "_model")
 
     def __init__(self) -> None:
         self._solver = z3.Z3_mk_solver(CTX)
+        z3.Z3_solver_inc_ref(CTX, self._solver)
+        self._model = None
+
+    def __del__(self) -> None:
+        z3.Z3_solver_dec_ref(CTX, self._solver)
+
+    def _set_model(self, model: Any) -> None:
+        if self._model is not None:
+            z3.Z3_model_dec_ref(CTX, self._model)
+        self._model = model
+        if self._model is not None:
+            z3.Z3_model_inc_ref(CTX, self._model)
 
     def add(self, assertion: Constraint, /) -> None:
         z3.Z3_solver_assert(
             CTX, self._solver, assertion._term  # pyright: ignore[reportPrivateUsage]
         )
+        self._set_model(None)
 
     def check(self, *assumptions: Constraint) -> bool:
+        self._set_model(None)
         arr = (z3.Ast * len(assumptions))(
             *(a._term for a in assumptions)  # pyright: ignore[reportPrivateUsage]
         )
         r = z3.Z3_solver_check_assumptions(CTX, self._solver, len(assumptions), arr)
         if r == z3.Z3_L_TRUE:
+            self._set_model(z3.Z3_solver_get_model(CTX, self._solver))
             return True
         elif r == z3.Z3_L_FALSE:
             return False
         else:
             reason = z3.Z3_solver_get_reason_unknown(CTX, self._solver)
             raise RuntimeError(f"Z3 could not solve this instance: {reason}")
+
+    def evaluate(self, bv: BitVector[N], /) -> int:
+        if self._model is None:
+            raise ValueError(f"solver is not ready for model evaluation.")
+        t = (z3.Ast * 1)()
+        assert z3.Z3_model_eval(
+            CTX, self._model, bv._term, True, t  # pyright: ignore[reportPrivateUsage]
+        )
+        r = int(z3.Z3_get_numeral_string(CTX, t[0]))
+        if isinstance(bv, Uint) or (r & (1 << (bv.width - 1)) == 0):
+            return r
+        return r - (1 << bv.width)

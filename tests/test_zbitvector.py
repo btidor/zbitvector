@@ -137,3 +137,30 @@ def test_array_equality():
     with pytest.raises(TypeError, match="arrays cannot be compared for equality"):
         if A == B:  # type: ignore
             pass
+
+
+def test_solver_validations():
+    s = Solver()
+    assert Uint8(1).reveal() == 1
+    with pytest.raises(ValueError, match="solver is not ready for model evaluation"):
+        s.evaluate(Uint8("X"))
+
+    s.add(Uint8("X") + Uint8(1) == Uint8(0))
+    assert Uint8(1).reveal() == 1
+    with pytest.raises(ValueError, match="solver is not ready for model evaluation"):
+        s.evaluate(Uint8("X"))
+
+    assert s.check() is True
+    assert Uint8(1).reveal() == 1
+    assert s.evaluate(Uint8("X")) == 255
+    assert Uint8(1).reveal() == 1
+
+    t = Solver()
+    t.add(Uint8("X") + Uint8(2) == Uint8(0))
+    assert t.check() is True
+
+    s.add(Constraint(True))
+    assert Uint8(1).reveal() == 1
+    with pytest.raises(ValueError, match="solver is not ready for model evaluation"):
+        s.evaluate(Uint8("X"))
+    assert t.evaluate(Uint8("X")) == 254

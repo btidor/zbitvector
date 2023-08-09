@@ -36,13 +36,21 @@ except ImportError:
     import pybitwuzla
     from pybitwuzla import BitwuzlaSort, BitwuzlaTerm, Kind, Option, Result
 
+
+N = TypeVar("N", bound=int)
+M = TypeVar("M", bound=int)
+
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.PRODUCE_MODELS, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 
-N = TypeVar("N", bound=int)
-M = TypeVar("M", bound=int)
+# We have to use a single, global Bitwuzla instance because all terms are
+# associated with an instance and can't be transferred to another. Therefore, we
+# track whether the last call to `check_sat()` was UNSAT (False) or SAT (the
+# Solver responsible for the call, if available, or True otherwise).
+last_check: Solver | bool = False
+
 
 CACHE: Dict[str, Tuple[type, BitwuzlaTerm]] = {}
 
@@ -82,6 +90,10 @@ class Symbolic(abc.ABC):
         Symbolic.__init__(result, term)
         return result
 
+    @abc.abstractmethod
+    def _evaluate(self) -> bool | int:
+        ...
+
     def __copy__(self) -> Self:
         return self
 
@@ -105,6 +117,15 @@ class Symbolic(abc.ABC):
     ) -> Constraint:
         return Constraint._from_expr(Kind.DISTINCT, self, other)
 
+    def reveal(self) -> bool | int | None:
+        global last_check
+        if not self._term.is_bv_value():
+            return None
+        if last_check is False:
+            assert BZLA.check_sat() == Result.SAT
+            last_check = True
+        return self._evaluate()
+
 
 class Constraint(Symbolic):
     _sort: ClassVar[BitwuzlaSort] = BZLA.mk_bool_sort()
@@ -116,6 +137,9 @@ class Constraint(Symbolic):
         else:
             term = BZLA.mk_bv_value(self._sort, int(value))
         super().__init__(term)
+
+    def _evaluate(self) -> bool:
+        return bool(int(BZLA.get_value_str(self._term), 2))
 
     def __invert__(self) -> Self:
         return self._from_expr(Kind.NOT, self)
@@ -134,12 +158,6 @@ class Constraint(Symbolic):
 
     def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         return then._from_expr(Kind.ITE, self, then, else_)
-
-    def reveal(self) -> bool | None:
-        if not self._term.is_bv_value():
-            return None
-        assert BZLA.check_sat() == Result.SAT
-        return bool(int(BZLA.get_value_str(self._term), 2))
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
@@ -206,6 +224,9 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
 class Uint(BitVector[N]):
     __slots__ = ()
 
+    def _evaluate(self) -> int:
+        return int(BZLA.get_value_str(self._term), 2)
+
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_ULT, self, other)
 
@@ -234,15 +255,15 @@ class Uint(BitVector[N]):
         Symbolic.__init__(result, term)
         return result
 
-    def reveal(self) -> int | None:
-        if not self._term.is_bv_value():
-            return None
-        assert BZLA.check_sat() == Result.SAT
-        return int(BZLA.get_value_str(self._term), 2)
-
 
 class Int(BitVector[N]):
     __slots__ = ()
+
+    def _evaluate(self) -> int:
+        i = int(BZLA.get_value_str(self._term), 2)
+        if i & (1 << (self.width - 1)) == 0:
+            return i
+        return i - (1 << self.width)
 
     def __lt__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.BV_SLT, self, other)
@@ -271,15 +292,6 @@ class Int(BitVector[N]):
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
-
-    def reveal(self) -> int | None:
-        if not self._term.is_bv_value():
-            return None
-        assert BZLA.check_sat() == Result.SAT
-        r = int(BZLA.get_value_str(self._term), 2)
-        if r & (1 << (self.width - 1)) == 0:
-            return r
-        return r - (1 << self.width)
 
 
 K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
@@ -347,19 +359,24 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
 
 
 class Solver:
-    __slots__ = ("_assertions",)
+    __slots__ = ("_assertions", "_current")
 
     def __init__(self) -> None:
         self._assertions: List[Constraint] = []
+        self._current = False
 
     def add(self, assertion: Constraint, /) -> None:
         self._assertions.append(assertion)
+        self._current = False
 
     def check(self, *assumptions: Constraint) -> bool:
         # Unfortunately, we have only the single global solver instance, BZLA,
         # because all terms are tied to it. This means we can't build up
         # assumptions using `assert_formula`. Instead, assume them all on every
         # call to `check`:
+        global last_check
+        self._current, last_check = False, False
+
         for c in self._assertions:
             BZLA.assume_formula(c._term)  # pyright: ignore[reportPrivateUsage]
         for c in assumptions:
@@ -367,8 +384,15 @@ class Solver:
 
         r = BZLA.check_sat()
         if r == Result.SAT:
+            self._current, last_check = True, self
             return True
         elif r == Result.UNSAT:
             return False
         else:
             raise RuntimeError("Bitwuzla could not solve this instance")
+
+    def evaluate(self, bv: BitVector[N], /) -> int:
+        global last_check
+        if not self._current or last_check is not self:
+            raise ValueError(f"solver is not ready for model evaluation.")
+        return bv._evaluate()  # pyright: ignore[reportPrivateUsage]

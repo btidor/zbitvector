@@ -690,6 +690,8 @@ class Solver:
     >>> s.add(Uint8("B") == Uint8(1))
     >>> s.check()
     True
+    >>> s.evaluate(Uint8("B"))
+    1
     >>> s.add(Uint8("B") == Uint8(2))
     >>> s.check()
     False
@@ -708,5 +710,18 @@ class Solver:
 
         If provided, *assumptions* are temporarily added to the solver state for
         this check only.
+        """
+        raise NotImplementedError
+
+    def evaluate(self, bv: BitVector[N], /) -> int:
+        """
+        Return a value for the given :class:`BitVector` consistent with the
+        solver's model.
+
+        Raises a :class:`ValueError` if these preconditions are not met:
+         - The most recent call to :func:`check` returned `True`.
+         - No subsequent calls to :func:`add` have been made.
+         - With the Bitwuzla backend: no subsequent calls to :func:`check` have
+           been made with any other :class:`Solver` instance.
         """
         raise NotImplementedError

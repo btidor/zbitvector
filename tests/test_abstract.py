@@ -30,8 +30,11 @@ def _enumerate_module(module: ModuleType) -> set[str]:
             if not inspect.isfunction(f):
                 continue
             if f.__name__.startswith("_") and not f.__name__.startswith("__"):
-                # Skip private members
-                continue
+                continue  # ignore private members
+            if f.__name__ == "__del__":
+                continue  # ignore finalizers
+            if f.__name__ == "reveal":
+                continue  # the Bitwuzla backend implements this specially
             if c.__name__ == "Symbolic" and f.__name__ == "__init__":
                 # This initializer takes a backend-specific type, but it's
                 # hidden from private subclasses.
