@@ -17,6 +17,8 @@ docs:
 release:
 	@bash -c '[[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]] || \
 		(echo "usage: make release V=x.y.z"; exit 1)'
+	@bash -c 'read -p "Release v$V? " -n 1 -r && echo && \
+		([[ $${REPLY^^} == "Y" ]] || exit 2)'
 	git tag -s "v$V" -m "zbitvector@v$V"
 	git push origin "v$V"
 	@echo "\n1. Draft release:\n   https://github.com/btidor/zbitvector/releases/tag/v$V"

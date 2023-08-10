@@ -15,7 +15,26 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - run: .github/workflows/release.sh
+      - run: |
+          set -eux -o pipefail
+          shopt -s failglob
+
+          RELEASE_TAG=$(git describe --abbrev=0)
+          RELEASE_COMMIT=$(git show-ref -d --tags "$RELEASE_TAG" | awk 'NR==2 {print $1}')
+          if [[ ! "$(git show -q $RELEASE_TAG)" =~ "zbitvector@$RELEASE_TAG" ]]; then
+              echo "error: tag is missing repository and version"
+              exit 1
+          fi
+
+          curl https://github.com/btidor.gpg | gpg --import
+          git verify-tag "$RELEASE_TAG"
+
+          BUILD_ID=$(.github/workflows/cirrus.py ${{ github.repository }} "$RELEASE_TAG" "$RELEASE_COMMIT")
+
+          curl --output wheels.zip "https://api.cirrus-ci.com/v1/artifact/build/$BUILD_ID/wheels.zip"
+          unzip wheels.zip
+          gh release upload "$RELEASE_TAG" wheelhouse/*
+          gh release edit "$RELEASE_TAG" --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
       - uses: pypa/gh-action-pypi-publish@release/v1
