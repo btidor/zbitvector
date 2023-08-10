@@ -32,6 +32,7 @@ bdist_task:
         <<: *BUILDER_TEMPLATE
         image: family/docker-builder-arm64
         architecture: arm64
+      use_compute_credits: true
       env:
         CIBW_ARCHS: "aarch64"
         CIBW_BUILD: "*manylinux*"
@@ -40,6 +41,7 @@ bdist_task:
         <<: *BUILDER_TEMPLATE
         image: family/docker-builder-arm64
         architecture: arm64
+      use_compute_credits: true
       env:
         CIBW_ARCHS: "aarch64"
         CIBW_BUILD: "*musllinux*"
@@ -49,6 +51,7 @@ bdist_task:
       env:
         CIBW_ARCHS: "arm64"
         CIBW_BEFORE_ALL: "sudo make ci"
+      use_compute_credits: true
     - name: "package / macosx-x86-64"
       macos_instance:
         image: ghcr.io/cirruslabs/macos-monterey-xcode:latest
