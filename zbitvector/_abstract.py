@@ -21,9 +21,6 @@ class Symbolic(abc.ABC):
     inherited by :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
 
-    # Workaround for https://github.com/microsoft/pyright/issues/5446:
-    __hash__: ClassVar[None] = None  # pyright: ignore[reportIncompatibleMethodOverride]
-
     @abc.abstractmethod
     def __init__(self, term: Any, /) -> None:
         raise NotImplementedError
@@ -63,6 +60,9 @@ class Symbolic(abc.ABC):
         >>> Uint8(2) != Uint8(5)
         Constraint(`true`)
         """
+        raise NotImplementedError
+
+    def __hash__(self) -> int:
         raise NotImplementedError
 
 

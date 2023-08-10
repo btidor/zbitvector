@@ -117,15 +117,19 @@ def test_bool():
 
 
 def test_hash():
-    assert not isinstance(Constraint(True), Hashable)
-    assert not isinstance(Uint8(0), Hashable)
+    assert isinstance(Constraint(True), Hashable)
+    assert isinstance(Uint8(0), Hashable)
     assert not isinstance(Array[Uint8, Uint8](Uint8(0)), Hashable)
 
-    # Make sure these raise an error both at runtime and from the typechecker:
-    with pytest.raises(TypeError, match="unhashable type"):
-        _ = {Constraint(True): 1}  # pyright: ignore[reportGeneralTypeIssues]
-    with pytest.raises(TypeError, match="unhashable type"):
-        _ = {Uint8(0): 0}  # pyright: ignore[reportGeneralTypeIssues]
+    _ = {Constraint(True): 1}  # ok
+    _ = {Uint8(0): 0}  # ok
+
+    assert hash(Constraint(True)) != hash(Constraint(False))
+    assert hash(Constraint(True)) == hash(~Constraint(False))
+    assert hash(Uint8(0)) != hash(Uint8(1))
+    assert hash(Uint8(0xFF)) == hash(~Uint8(0))
+
+    # Make sure this raises an error both at runtime and from the typechecker:
     with pytest.raises(TypeError, match="unhashable type"):
         _ = {Array[Uint8, Uint8]("UHA"): 0}  # pyright: ignore[reportGeneralTypeIssues]
 

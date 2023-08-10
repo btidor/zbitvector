@@ -91,6 +91,9 @@ class Symbolic(abc.ABC):
     ) -> Constraint:
         return Constraint._from_expr_tuple(z3.Z3_mk_distinct, self, other)
 
+    def __hash__(self) -> int:
+        return z3.Z3_get_ast_hash(CTX, self._term)
+
 
 class Constraint(Symbolic):
     _sort: Final[Any] = z3.Z3_mk_bool_sort(CTX)

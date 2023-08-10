@@ -117,6 +117,9 @@ class Symbolic(abc.ABC):
     ) -> Constraint:
         return Constraint._from_expr(Kind.DISTINCT, self, other)
 
+    def __hash__(self) -> int:
+        return self._term.__hash__()
+
     def reveal(self) -> bool | int | None:
         global last_check
         if not self._term.is_bv_value():
