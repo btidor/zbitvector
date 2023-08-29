@@ -19,7 +19,7 @@ def test_bitvector_validations():
         IntA(123)
 
     K = TypeVar("K", bound=int)
-    IntK = Int[K]  # ok
+    IntK = Int[K]  # type: ignore
     with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
         IntK(123)
 
@@ -49,9 +49,9 @@ def test_array_validations():
         Array[IntA, IntA]("A")
 
     T = TypeVar("T", bound=Uint[Any])
-    Array[T, T]  # ok
+    Array[T, T]  # type: ignore
     with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
-        Array[T, T](123)
+        Array[T, T](123)  # type: ignore
 
     with pytest.raises(
         TypeError,
