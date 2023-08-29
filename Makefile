@@ -32,9 +32,9 @@ clean:
 ci: $(INCLUDE)/bitwuzla/bitwuzla.h
 
 $(INCLUDE)/gmp.h:
-	-rm -r $(DEPDIR)/gmp-6.2.1
-	curl https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz | tar xJC $(DEPDIR)
-	cd $(DEPDIR)/gmp-6.2.1 && \
+	-rm -r $(DEPDIR)/gmp-6.3.0
+	curl https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar xJC $(DEPDIR)
+	cd $(DEPDIR)/gmp-6.3.0 && \
 		./configure --enable-cxx --enable-fat && \
 		make -j4 && make -j4 check && make install
 

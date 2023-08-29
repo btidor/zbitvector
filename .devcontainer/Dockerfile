@@ -15,8 +15,8 @@ RUN apt -y install autoconf build-essential cmake
 RUN pip install --upgrade cython
 
 # Bitwula: libgmp
-RUN curl https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz | tar xJC /opt
-WORKDIR /opt/gmp-6.2.1
+RUN curl https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar xJC /opt
+WORKDIR /opt/gmp-6.3.0
 RUN ./configure --enable-cxx --enable-fat
 RUN make -j4 && make -j4 check && make install
 
