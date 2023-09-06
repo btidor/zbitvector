@@ -60,7 +60,7 @@ bdist_task:
         CIBW_BEFORE_ALL: "sudo arch -x86_64 make ci"
   setup_script:
     - git tag -l
-    - python3 -m pip install cibuildwheel==2.14.0
+    - python3 -m pip install cibuildwheel==2.15.0
   build_script:
     - python3 -m cibuildwheel
   wheels_artifacts:
