@@ -62,8 +62,7 @@ class ArrayMeta(abc.ABCMeta):
         instead of one.
         """
         if (
-            not isinstance(args, tuple)
-            or len(args) != 2  # pyright: ignore[reportUnknownArgumentType]
+            not isinstance(args, tuple) or len(args) != 2  # pyright: ignore[reportUnknownArgumentType]
         ):
             raise TypeError(
                 f"unexpected type parameter passed to {self.__name__}[...]; expected a pair of types"

@@ -1,19 +1,15 @@
 {
-    "editor.codeActionsOnSave": [
-        "source.organizeImports",
-    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
     "files.exclude": {
         "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
     },
-    "isort.args": [
-        "--profile=black",
-    ],
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.typeCheckingMode": "strict",
-    "python.formatting.provider": "black",
-    "python.linting.pydocstyleEnabled": true,
-    "python.linting.pydocstyleArgs": [
-        "--match='(?!setup.py).*\\.py'",
-    ]
 }

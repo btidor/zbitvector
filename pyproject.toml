@@ -43,6 +43,19 @@ reportUnnecessaryTypeIgnoreComment = true
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 
+[tool.ruff.lint]
+extend-select = ["D"]
+exclude = ["zbitvector/pybitwuzla.pyi"]
+ignore = ["D205", "D400"]
+pydocstyle.convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"**/conftest.py" = ["D"]
+".github/**" = ["D"]
+"benchmarks/**" = ["D"]
+"tests/**" = ["D"]
+"setup.py" = ["D"]
+
 [tool.setuptools]
 packages = ["zbitvector", "zbitvector.pybitwuzla"]
 license-files = ["LICENSE", "THIRDPARTY"]

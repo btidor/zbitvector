@@ -38,6 +38,7 @@ autodoc_default_options = {
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
+# ruff: noqa: E402
 import sys
 from pathlib import Path
 

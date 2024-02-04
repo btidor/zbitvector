@@ -60,9 +60,7 @@ def _mk_const(instance: Symbolic | Array[K, V], name: str) -> BitwuzlaTerm:
     # independent-but-indistinguishable constants. To avoid confusion and
     # maintain parity with Z3, we cache constants by name.
     if name not in CACHE:
-        term = BZLA.mk_const(
-            instance._sort, name  # pyright: ignore[reportPrivateUsage]
-        )
+        term = BZLA.mk_const(instance._sort, name)  # pyright: ignore[reportPrivateUsage]
         CACHE[name] = (instance.__class__, term)
     cls, term = CACHE[name]
     if not isinstance(instance, cls):
@@ -84,7 +82,8 @@ class Symbolic(abc.ABC):
     @classmethod
     def _from_expr(cls, kind: Kind, *syms: Symbolic | Array[K, V]) -> Self:
         term = BZLA.mk_term(
-            kind, tuple(s._term for s in syms)  # pyright: ignore[reportPrivateUsage]
+            kind,
+            tuple(s._term for s in syms),  # pyright: ignore[reportPrivateUsage]
         )
         result = cls.__new__(cls)
         Symbolic.__init__(result, term)
@@ -311,16 +310,12 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
         if isinstance(value, str):
             term = _mk_const(self, value)
         else:
-            term = BZLA.mk_const_array(
-                self._sort, value._term  # pyright: ignore[reportPrivateUsage]
-            )
+            term = BZLA.mk_const_array(self._sort, value._term)  # pyright: ignore[reportPrivateUsage]
         self._term: BitwuzlaTerm = term
 
     @classmethod
     def _make_sort(cls, key: K, value: V) -> BitwuzlaSort:
-        return BZLA.mk_array_sort(
-            key._sort, value._sort  # pyright: ignore[reportPrivateUsage]
-        )
+        return BZLA.mk_array_sort(key._sort, value._sort)  # pyright: ignore[reportPrivateUsage]
 
     def __copy__(self) -> Self:
         result = self.__new__(self.__class__)
@@ -342,12 +337,12 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
     ) -> Never:
-        raise TypeError(f"arrays cannot be compared for equality.")
+        raise TypeError("arrays cannot be compared for equality.")
 
     def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
     ) -> Never:
-        raise TypeError(f"arrays cannot be compared for equality.")
+        raise TypeError("arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:
         return self._value._from_expr(  # pyright: ignore[reportPrivateUsage]
@@ -397,5 +392,5 @@ class Solver:
     def evaluate(self, bv: BitVector[N], /) -> int:
         global last_check
         if not self._current or last_check is not self:
-            raise ValueError(f"solver is not ready for model evaluation.")
+            raise ValueError("solver is not ready for model evaluation.")
         return bv._evaluate()  # pyright: ignore[reportPrivateUsage]

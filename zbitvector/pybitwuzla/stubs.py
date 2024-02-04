@@ -8,6 +8,7 @@ import re
 from zbitvector import pybitwuzla  # type: ignore
 
 # pyright: reportUnnecessaryTypeIgnoreComment=false
+# ruff: noqa: D103, F541
 
 
 def munge(expr: str) -> str:

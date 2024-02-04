@@ -5,7 +5,7 @@ from typing import Any, Dict, Literal
 import pytest
 from typing_extensions import TypeAlias
 
-from . import *
+from . import Array, Constraint, Int, Solver, Uint
 
 Uint8: TypeAlias = Uint[Literal[8]]
 Uint64: TypeAlias = Uint[Literal[64]]

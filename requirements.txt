@@ -3,9 +3,8 @@ typing_extensions
 z3-solver
 
 # Linters
-black
-pydocstyle
 pyright
+ruff
 
 # Toolchain
 build

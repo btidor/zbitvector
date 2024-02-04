@@ -52,7 +52,8 @@ class Symbolic(abc.ABC):
         cls, kind: Callable[..., Any], *syms: Symbolic | Array[K, V]
     ) -> Self:
         term = kind(
-            CTX, *(s._term for s in syms)  # pyright: ignore[reportPrivateUsage]
+            CTX,
+            *(s._term for s in syms),  # pyright: ignore[reportPrivateUsage]
         )
         term = z3.Z3_simplify(CTX, term)
         result = cls.__new__(cls)
@@ -285,16 +286,12 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
             term = _mk_const(self, value)
         else:
             self._sort  # for error message consistency
-            term = z3.Z3_mk_const_array(
-                CTX, self._key._sort, value._term  # pyright: ignore[reportPrivateUsage]
-            )
+            term = z3.Z3_mk_const_array(CTX, self._key._sort, value._term)  # pyright: ignore[reportPrivateUsage]
         self._term = term
 
     @classmethod
     def _make_sort(cls, key: K, value: V) -> Any:
-        return z3.Z3_mk_array_sort(
-            CTX, key._sort, value._sort  # pyright: ignore[reportPrivateUsage]
-        )
+        return z3.Z3_mk_array_sort(CTX, key._sort, value._sort)  # pyright: ignore[reportPrivateUsage]
 
     def __copy__(self) -> Self:
         result = self.__new__(self.__class__)
@@ -314,12 +311,12 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
     def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
     ) -> Never:
-        raise TypeError(f"arrays cannot be compared for equality.")
+        raise TypeError("arrays cannot be compared for equality.")
 
     def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, other: Never, /
     ) -> Never:
-        raise TypeError(f"arrays cannot be compared for equality.")
+        raise TypeError("arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:
         return self._value._from_expr(  # pyright: ignore[reportPrivateUsage]
@@ -357,9 +354,7 @@ class Solver:
             z3.Z3_model_inc_ref(CTX, self._model)
 
     def add(self, assertion: Constraint, /) -> None:
-        z3.Z3_solver_assert(
-            CTX, self._solver, assertion._term  # pyright: ignore[reportPrivateUsage]
-        )
+        z3.Z3_solver_assert(CTX, self._solver, assertion._term)  # pyright: ignore[reportPrivateUsage]
         self._set_model(None)
 
     def check(self, *assumptions: Constraint) -> bool:
@@ -379,11 +374,9 @@ class Solver:
 
     def evaluate(self, bv: BitVector[N], /) -> int:
         if self._model is None:
-            raise ValueError(f"solver is not ready for model evaluation.")
+            raise ValueError("solver is not ready for model evaluation.")
         t = (z3.Ast * 1)()
-        assert z3.Z3_model_eval(
-            CTX, self._model, bv._term, True, t  # pyright: ignore[reportPrivateUsage]
-        )
+        assert z3.Z3_model_eval(CTX, self._model, bv._term, True, t)  # pyright: ignore[reportPrivateUsage]
         r = int(z3.Z3_get_numeral_string(CTX, t[0]))
         if isinstance(bv, Uint) or (r & (1 << (bv.width - 1)) == 0):
             return r

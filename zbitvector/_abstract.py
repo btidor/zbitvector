@@ -17,7 +17,7 @@ M = TypeVar("M", bound=int)
 
 class Symbolic(abc.ABC):
     """
-    Represents an immutable symbolic value. This abstract base class is
+    represents an immutable symbolic value. This abstract base class is
     inherited by :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
 
@@ -162,11 +162,11 @@ class Constraint(Symbolic):
         ...
 
     def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
-        """
+        r"""
         Perform an if-then-else based on this constraint. The result is `then`
         if the constraint evaluates to `True` and `else_` otherwise.
 
-        :SMT-LIB: (ite self then else\\_)
+        :SMT-LIB: (ite self then else\_)
 
         >>> Constraint(True).ite(Uint8(0xA), Uint8(0xB))
         Uint8(`#x0a`)
@@ -221,12 +221,10 @@ class BitVector(Symbolic, Generic[N]):
 
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
-        """"""
         ...
 
     @abc.abstractmethod
     def __le__(self, other: Self, /) -> Constraint:
-        """"""
         ...
 
     def __invert__(self) -> Self:

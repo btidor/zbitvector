@@ -5,22 +5,21 @@ from typing import Any, Literal, TypeVar, Union
 
 import pytest
 
-# pyright: reportWildcardImportFromLibrary=false
-from zbitvector import *
+from zbitvector import Array, Constraint, Int, Solver, Uint
 from zbitvector.conftest import Int8, Uint8, Uint64
 
 
 def test_bitvector_validations():
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Int(123)
 
     IntA = Int[Union[Literal[32], Literal[64]]]  # ok
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         IntA(123)
 
     K = TypeVar("K", bound=int)
     IntK = Int[K]  # type: ignore
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         IntK(123)
 
     with pytest.raises(
@@ -40,17 +39,17 @@ def test_bitvector_validations():
 
 
 def test_array_validations():
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Array("A")
 
     IntA = Int[Union[Literal[32], Literal[64]]]
     Array[IntA, IntA]  # ok
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Array[IntA, IntA]("A")
 
     T = TypeVar("T", bound=Uint[Any])
     Array[T, T]  # type: ignore
-    with pytest.raises(AttributeError, match=f"has no attribute '_sort'"):
+    with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Array[T, T](123)  # type: ignore
 
     with pytest.raises(
