@@ -142,6 +142,22 @@ def test_array_equality():
             pass
 
 
+def test_ite_optimizations():
+    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
+    t = t >> Uint8(4)
+    t = t >> Uint8(3)
+    assert t.reveal() == 0
+
+    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
+    t = t >> Uint8(4)
+    t = t.into(Uint64) >> Uint64(3)
+    assert t.reveal() == 0
+
+    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
+    t = Constraint("ITEB").ite(t, Uint8(0))
+    assert str(t).index("ITEB") < str(t).index("ITEA")
+
+
 def test_solver_validations():
     s = Solver()
     assert Uint8(1).reveal() == 1

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import abc
+import os
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -44,6 +45,8 @@ BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.PRODUCE_MODELS, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
+
+OPTIMIZE = os.getenv("ZBITVECTOR_OPTIMIZE", "1").lower() in ("true", "t", "1")
 
 # We have to use a single, global Bitwuzla instance because all terms are
 # associated with an instance and can't be transferred to another. Therefore, we
@@ -178,6 +181,34 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     def _make_sort(cls, width: int) -> BitwuzlaSort:
         return BZLA.mk_bv_sort(width)
 
+    def _from_expr1(
+        self, other: type[BitVector[M]], kind: Kind | None, args: tuple[int, ...]
+    ) -> BitVector[M]:
+        if kind is None:
+            term = self._term
+        elif self._term.get_kind() == Kind.ITE and OPTIMIZE:
+            (condition, term1, term2) = self._term.get_children()
+            term1 = BZLA.mk_term(kind, (term1,), args)
+            term2 = BZLA.mk_term(kind, (term2,), args)
+            term = BZLA.mk_term(Kind.ITE, (condition, term1, term2))
+        else:
+            term = BZLA.mk_term(kind, (self._term,), args)
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result
+
+    def _from_expr2(self, kind: Kind, other: Symbolic) -> Self:
+        if self._term.get_kind() == Kind.ITE and OPTIMIZE:
+            (condition, term1, term2) = self._term.get_children()
+            term1 = BZLA.mk_term(kind, (term1, other._term))
+            term2 = BZLA.mk_term(kind, (term2, other._term))
+            term = BZLA.mk_term(Kind.ITE, (condition, term1, term2))
+        else:
+            term = BZLA.mk_term(kind, (self._term, other._term))
+        result = self.__class__.__new__(self.__class__)
+        Symbolic.__init__(result, term)
+        return result
+
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
         ...
@@ -190,22 +221,22 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         return self._from_expr(Kind.BV_NOT, self)
 
     def __and__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_AND, self, other)
+        return self._from_expr2(Kind.BV_AND, other)
 
     def __or__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_OR, self, other)
+        return self._from_expr2(Kind.BV_OR, other)
 
     def __xor__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_XOR, self, other)
+        return self._from_expr2(Kind.BV_XOR, other)
 
     def __add__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_ADD, self, other)
+        return self._from_expr2(Kind.BV_ADD, other)
 
     def __sub__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_SUB, self, other)
+        return self._from_expr2(Kind.BV_SUB, other)
 
     def __mul__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_MUL, self, other)
+        return self._from_expr2(Kind.BV_MUL, other)
 
     @abc.abstractmethod
     def __truediv__(self, other: Self, /) -> Self:
@@ -216,7 +247,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr(Kind.BV_SHL, self, other)
+        return self._from_expr2(Kind.BV_SHL, other)
 
     @abc.abstractmethod
     def __rshift__(self, other: Uint[N], /) -> Self:
@@ -236,26 +267,23 @@ class Uint(BitVector[N]):
         return Constraint._from_expr(Kind.BV_ULE, self, other)
 
     def __truediv__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_UDIV, self, other)
+        return self._from_expr2(Kind.BV_UDIV, other)
 
     def __mod__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_UREM, self, other)
+        return self._from_expr2(Kind.BV_UREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr(Kind.BV_SHR, self, other)
+        return self._from_expr2(Kind.BV_SHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
-            term = BZLA.mk_term(
-                Kind.BV_ZERO_EXTEND, (self._term,), (other.width - self.width,)
+            return self._from_expr1(
+                other, Kind.BV_ZERO_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            term = BZLA.mk_term(Kind.BV_EXTRACT, (self._term,), (other.width - 1, 0))
+            return self._from_expr1(other, Kind.BV_EXTRACT, (other.width - 1, 0))
         else:
-            term = self._term
-        result = other.__new__(other)
-        Symbolic.__init__(result, term)
-        return result
+            return self._from_expr1(other, None, ())
 
 
 class Int(BitVector[N]):
@@ -274,26 +302,23 @@ class Int(BitVector[N]):
         return Constraint._from_expr(Kind.BV_SLE, self, other)
 
     def __truediv__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_SDIV, self, other)
+        return self._from_expr2(Kind.BV_SDIV, other)
 
     def __mod__(self, other: Self, /) -> Self:
-        return self._from_expr(Kind.BV_SREM, self, other)
+        return self._from_expr2(Kind.BV_SREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr(Kind.BV_ASHR, self, other)
+        return self._from_expr2(Kind.BV_ASHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
-            term = BZLA.mk_term(
-                Kind.BV_SIGN_EXTEND, (self._term,), (other.width - self.width,)
+            return self._from_expr1(
+                other, Kind.BV_SIGN_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            term = BZLA.mk_term(Kind.BV_EXTRACT, (self._term,), (other.width - 1, 0))
+            return self._from_expr1(other, Kind.BV_EXTRACT, (other.width - 1, 0))
         else:
-            term = self._term
-        result = other.__new__(other)
-        Symbolic.__init__(result, term)
-        return result
+            return self._from_expr1(other, None, ())
 
 
 K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
