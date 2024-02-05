@@ -18,7 +18,7 @@ jobs:
         env:
           O: -W # fail on warning
           ZBITVECTOR_SOLVER: dummy
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html
 
