@@ -3,13 +3,11 @@ from __future__ import annotations
 import abc
 from typing import Any, Dict, Literal, Tuple, TypeVar, Union, cast, get_args, get_origin
 
-from typing_extensions import Self
-
 
 class BitVectorMeta(abc.ABCMeta):
     _ccache: Dict[str, type] = {}
 
-    def __getitem__(self, N: Any, /) -> Self:
+    def __getitem__(self, N: Any, /) -> Any:
         """
         Here's how Uint[N] (and Int[N]) work under the hood:
 
@@ -50,13 +48,13 @@ class BitVectorMeta(abc.ABCMeta):
             cls = type(name, (self,), {"width": n, "_sort": sort, "__slots__": ()})
             cls.__module__ = self.__module__
             self._ccache[name] = cls
-        return cast(Self, self._ccache[name])
+        return self._ccache[name]
 
 
 class ArrayMeta(abc.ABCMeta):
     _ccache: Dict[str, type] = {}
 
-    def __getitem__(self, args: Any, /) -> Self:
+    def __getitem__(self, args: Any, /) -> Any:
         """
         Arrays work just like BitVectors, except they take two type parameters
         instead of one.
@@ -97,4 +95,4 @@ class ArrayMeta(abc.ABCMeta):
             )
             cls.__module__ = self.__module__
             self._ccache[name] = cls
-        return cast(Self, self._ccache[name])
+        return self._ccache[name]
