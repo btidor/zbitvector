@@ -158,6 +158,16 @@ def test_ite_optimizations():
     assert str(t).index("ITEB") < str(t).index("ITEA")
 
 
+def test_shift_optimizations():
+    v = Uint64("SHIFT")
+    assert str(v << Uint64(8) << Uint64(8)) == str(v << Uint64(16))
+    assert str(v >> Uint64(8) >> Uint64(8)) == str(v >> Uint64(16))
+
+    assert (v << Uint64(8)).into(Uint8).reveal() == 0
+    assert ((v & Uint64(0x00FFFFFFFFFFFFFF)) >> Uint64(56)).into(Uint8).reveal() == 0
+    assert str((v >> Uint64(34)).into(Uint8)) == "Uint8(`((_ extract 41 34) SHIFT)`)"
+
+
 def test_solver_validations():
     s = Solver()
     assert Uint8(1).reveal() == 1

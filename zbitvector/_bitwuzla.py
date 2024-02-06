@@ -209,6 +209,69 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         Symbolic.__init__(result, term)
         return result
 
+    def _from_expr3(self, kind: Kind, other: Symbolic) -> Self:
+        if (
+            not OPTIMIZE
+            or self._term.get_kind() != kind
+            or (b := other.reveal()) is None
+        ):
+            return self._from_expr2(kind, other)
+
+        (base, a) = self._term.get_children()
+        if not a.is_bv_value():
+            return self._from_expr2(kind, other)
+
+        global last_check
+        if last_check is False:
+            assert BZLA.check_sat() == Result.SAT
+            last_check = True
+        shift = b + int(BZLA.get_value_str(a), 2)
+
+        if shift > self.width:
+            return self._from_expr2(kind, other)
+        shift = BZLA.mk_bv_value(self._sort, shift)
+        term = BZLA.mk_term(kind, (base, shift))
+        result = self.__class__.__new__(self.__class__)
+        Symbolic.__init__(result, term)
+        return result
+
+    def _from_expr4(
+        self, other: type[BitVector[M]], high: int, low: int
+    ) -> BitVector[M]:
+        assert high > low
+        if not OPTIMIZE or (kind := self._term.get_kind()) not in (
+            Kind.BV_SHL,
+            Kind.BV_SHR,
+        ):
+            return self._from_expr1(other, Kind.BV_EXTRACT, (high, low))
+
+        (base, shift) = self._term.get_children()
+        if not shift.is_bv_value():
+            return self._from_expr1(other, Kind.BV_EXTRACT, (high, low))
+
+        global last_check
+        if last_check is False:
+            assert BZLA.check_sat() == Result.SAT
+            last_check = True
+        shift = int(BZLA.get_value_str(shift), 2)
+        term = self._term
+
+        match kind:
+            case Kind.BV_SHL:
+                if low - shift >= 0:
+                    high, low, term = high - shift, low - shift, base
+                elif high - shift <= 0:
+                    return other(0)
+            case Kind.BV_SHR:
+                if high + shift < self.width:
+                    high, low, term = high + shift, low + shift, base
+                elif low + shift >= self.width:
+                    return other(0)
+        term = BZLA.mk_term(Kind.BV_EXTRACT, (term,), (high, low))
+        result = other.__new__(other)
+        Symbolic.__init__(result, term)
+        return result
+
     @abc.abstractmethod
     def __lt__(self, other: Self, /) -> Constraint:
         ...
@@ -247,7 +310,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr2(Kind.BV_SHL, other)
+        return self._from_expr3(Kind.BV_SHL, other)
 
     @abc.abstractmethod
     def __rshift__(self, other: Uint[N], /) -> Self:
@@ -273,7 +336,7 @@ class Uint(BitVector[N]):
         return self._from_expr2(Kind.BV_UREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr2(Kind.BV_SHR, other)
+        return self._from_expr3(Kind.BV_SHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
@@ -281,7 +344,7 @@ class Uint(BitVector[N]):
                 other, Kind.BV_ZERO_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr1(other, Kind.BV_EXTRACT, (other.width - 1, 0))
+            return self._from_expr4(other, other.width - 1, 0)
         else:
             return self._from_expr1(other, None, ())
 
@@ -308,7 +371,7 @@ class Int(BitVector[N]):
         return self._from_expr2(Kind.BV_SREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr2(Kind.BV_ASHR, other)
+        return self._from_expr3(Kind.BV_ASHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
@@ -316,7 +379,7 @@ class Int(BitVector[N]):
                 other, Kind.BV_SIGN_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr1(other, Kind.BV_EXTRACT, (other.width - 1, 0))
+            return self._from_expr4(other, other.width - 1, 0)
         else:
             return self._from_expr1(other, None, ())
 
