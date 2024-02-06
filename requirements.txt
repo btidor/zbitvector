@@ -1,6 +1,6 @@
 # Dependencies
 typing_extensions
-z3-solver
+z3-solver==4.12.5.0
 
 # Linters
 pyright
