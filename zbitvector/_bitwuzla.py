@@ -74,6 +74,35 @@ def _mk_const(instance: Symbolic | Array[K, V], name: str) -> BitwuzlaTerm:
     return term
 
 
+def _reset_solver() -> None:
+    global last_check
+    if last_check is False:
+        assert BZLA.check_sat() == Result.SAT
+        last_check = True
+
+
+def _maybe_stack(
+    kind: Kind, width: int, term1: BitwuzlaTerm, term2: BitwuzlaTerm
+) -> BitwuzlaTerm:
+    if (
+        not OPTIMIZE
+        or kind not in (Kind.BV_SHL, Kind.BV_SHR)
+        or term1.get_kind() != kind
+        or not term2.is_bv_value()
+    ):
+        return BZLA.mk_term(kind, (term1, term2))
+    (base, a) = term1.get_children()
+    if not a.is_bv_value():
+        return BZLA.mk_term(kind, (term1, term2))
+
+    _reset_solver()
+    shift = int(BZLA.get_value_str(term2), 2) + int(BZLA.get_value_str(a), 2)
+    if shift > width:
+        return BZLA.mk_bv_value(term1.get_sort(), 0)  # unsigned shifts only!
+    shift = BZLA.mk_bv_value(term1.get_sort(), shift)
+    return BZLA.mk_term(kind, (base, shift))
+
+
 class Symbolic(abc.ABC):
     _sort: ClassVar[BitwuzlaSort]
     __slots__ = ("_term",)
@@ -123,12 +152,9 @@ class Symbolic(abc.ABC):
         return self._term.__hash__()
 
     def reveal(self) -> bool | int | None:
-        global last_check
         if not self._term.is_bv_value():
             return None
-        if last_check is False:
-            assert BZLA.check_sat() == Result.SAT
-            last_check = True
+        _reset_solver()
         return self._evaluate()
 
 
@@ -200,42 +226,16 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     def _from_expr2(self, kind: Kind, other: Symbolic) -> Self:
         if self._term.get_kind() == Kind.ITE and OPTIMIZE:
             (condition, term1, term2) = self._term.get_children()
-            term1 = BZLA.mk_term(kind, (term1, other._term))
-            term2 = BZLA.mk_term(kind, (term2, other._term))
+            term1 = _maybe_stack(kind, self.width, term1, other._term)
+            term2 = _maybe_stack(kind, self.width, term2, other._term)
             term = BZLA.mk_term(Kind.ITE, (condition, term1, term2))
         else:
-            term = BZLA.mk_term(kind, (self._term, other._term))
+            term = _maybe_stack(kind, self.width, self._term, other._term)
         result = self.__class__.__new__(self.__class__)
         Symbolic.__init__(result, term)
         return result
 
-    def _from_expr3(self, kind: Kind, other: Symbolic) -> Self:
-        if (
-            not OPTIMIZE
-            or self._term.get_kind() != kind
-            or (b := other.reveal()) is None
-        ):
-            return self._from_expr2(kind, other)
-
-        (base, a) = self._term.get_children()
-        if not a.is_bv_value():
-            return self._from_expr2(kind, other)
-
-        global last_check
-        if last_check is False:
-            assert BZLA.check_sat() == Result.SAT
-            last_check = True
-        shift = b + int(BZLA.get_value_str(a), 2)
-
-        if shift > self.width:
-            return self._from_expr2(kind, other)
-        shift = BZLA.mk_bv_value(self._sort, shift)
-        term = BZLA.mk_term(kind, (base, shift))
-        result = self.__class__.__new__(self.__class__)
-        Symbolic.__init__(result, term)
-        return result
-
-    def _from_expr4(
+    def _from_expr3(
         self, other: type[BitVector[M]], high: int, low: int
     ) -> BitVector[M]:
         assert high > low
@@ -249,10 +249,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         if not shift.is_bv_value():
             return self._from_expr1(other, Kind.BV_EXTRACT, (high, low))
 
-        global last_check
-        if last_check is False:
-            assert BZLA.check_sat() == Result.SAT
-            last_check = True
+        _reset_solver()
         shift = int(BZLA.get_value_str(shift), 2)
         term = self._term
 
@@ -310,7 +307,7 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr3(Kind.BV_SHL, other)
+        return self._from_expr2(Kind.BV_SHL, other)
 
     @abc.abstractmethod
     def __rshift__(self, other: Uint[N], /) -> Self:
@@ -336,7 +333,7 @@ class Uint(BitVector[N]):
         return self._from_expr2(Kind.BV_UREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr3(Kind.BV_SHR, other)
+        return self._from_expr2(Kind.BV_SHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
@@ -344,7 +341,7 @@ class Uint(BitVector[N]):
                 other, Kind.BV_ZERO_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr4(other, other.width - 1, 0)
+            return self._from_expr3(other, other.width - 1, 0)
         else:
             return self._from_expr1(other, None, ())
 
@@ -371,7 +368,7 @@ class Int(BitVector[N]):
         return self._from_expr2(Kind.BV_SREM, other)
 
     def __rshift__(self, other: Uint[N], /) -> Self:
-        return self._from_expr3(Kind.BV_ASHR, other)
+        return self._from_expr2(Kind.BV_ASHR, other)
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         if self.width < other.width:
@@ -379,7 +376,7 @@ class Int(BitVector[N]):
                 other, Kind.BV_SIGN_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr4(other, other.width - 1, 0)
+            return self._from_expr3(other, other.width - 1, 0)
         else:
             return self._from_expr1(other, None, ())
 
