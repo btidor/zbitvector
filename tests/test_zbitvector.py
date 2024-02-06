@@ -171,6 +171,9 @@ def test_shift_optimizations():
     s = str(c << Uint64(8))
     assert "(bvshl SHIFT #x0000000000000010)" in s or "((_ extract 47 0) SHIFT)" in s
 
+    c = Constraint("SHC").ite(v >> Uint64(8), Uint64(0))
+    assert "((_ extract 23 16) SHIFT)" in str((c >> Uint64(8)).into(Uint8))
+
 
 def test_solver_validations():
     s = Solver()

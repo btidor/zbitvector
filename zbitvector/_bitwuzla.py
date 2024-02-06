@@ -7,6 +7,7 @@ import os
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     Final,
@@ -79,28 +80,6 @@ def _reset_solver() -> None:
     if last_check is False:
         assert BZLA.check_sat() == Result.SAT
         last_check = True
-
-
-def _maybe_stack(
-    kind: Kind, width: int, term1: BitwuzlaTerm, term2: BitwuzlaTerm
-) -> BitwuzlaTerm:
-    if (
-        not OPTIMIZE
-        or kind not in (Kind.BV_SHL, Kind.BV_SHR)
-        or term1.get_kind() != kind
-        or not term2.is_bv_value()
-    ):
-        return BZLA.mk_term(kind, (term1, term2))
-    (base, a) = term1.get_children()
-    if not a.is_bv_value():
-        return BZLA.mk_term(kind, (term1, term2))
-
-    _reset_solver()
-    shift = int(BZLA.get_value_str(term2), 2) + int(BZLA.get_value_str(a), 2)
-    if shift > width:
-        return BZLA.mk_bv_value(term1.get_sort(), 0)  # unsigned shifts only!
-    shift = BZLA.mk_bv_value(term1.get_sort(), shift)
-    return BZLA.mk_term(kind, (base, shift))
 
 
 class Symbolic(abc.ABC):
@@ -212,59 +191,28 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     ) -> BitVector[M]:
         if kind is None:
             term = self._term
-        elif self._term.get_kind() == Kind.ITE and OPTIMIZE:
-            (condition, term1, term2) = self._term.get_children()
-            term1 = BZLA.mk_term(kind, (term1,), args)
-            term2 = BZLA.mk_term(kind, (term2,), args)
-            term = BZLA.mk_term(Kind.ITE, (condition, term1, term2))
         else:
-            term = BZLA.mk_term(kind, (self._term,), args)
+            term = Optimizations.raise_ite(
+                self._term, lambda t: BZLA.mk_term(kind, (t,), args)
+            )
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
 
     def _from_expr2(self, kind: Kind, other: Symbolic) -> Self:
-        if self._term.get_kind() == Kind.ITE and OPTIMIZE:
-            (condition, term1, term2) = self._term.get_children()
-            term1 = _maybe_stack(kind, self.width, term1, other._term)
-            term2 = _maybe_stack(kind, self.width, term2, other._term)
-            term = BZLA.mk_term(Kind.ITE, (condition, term1, term2))
-        else:
-            term = _maybe_stack(kind, self.width, self._term, other._term)
+        term = Optimizations.raise_ite(
+            self._term,
+            lambda t: Optimizations.stack_shifts(kind, self.width, t, other._term),
+        )
         result = self.__class__.__new__(self.__class__)
         Symbolic.__init__(result, term)
         return result
 
-    def _from_expr3(
-        self, other: type[BitVector[M]], high: int, low: int
-    ) -> BitVector[M]:
-        assert high > low
-        if not OPTIMIZE or (kind := self._term.get_kind()) not in (
-            Kind.BV_SHL,
-            Kind.BV_SHR,
-        ):
-            return self._from_expr1(other, Kind.BV_EXTRACT, (high, low))
-
-        (base, shift) = self._term.get_children()
-        if not shift.is_bv_value():
-            return self._from_expr1(other, Kind.BV_EXTRACT, (high, low))
-
-        _reset_solver()
-        shift = int(BZLA.get_value_str(shift), 2)
-        term = self._term
-
-        match kind:
-            case Kind.BV_SHL:
-                if low - shift >= 0:
-                    high, low, term = high - shift, low - shift, base
-                elif high - shift <= 0:
-                    return other(0)
-            case Kind.BV_SHR:
-                if high + shift < self.width:
-                    high, low, term = high + shift, low + shift, base
-                elif low + shift >= self.width:
-                    return other(0)
-        term = BZLA.mk_term(Kind.BV_EXTRACT, (term,), (high, low))
+    def _from_expr3(self, other: type[BitVector[M]]) -> BitVector[M]:
+        term = Optimizations.raise_ite(
+            self._term,
+            lambda t: Optimizations.rewrite_extract_shift(t, self.width, other.width),
+        )
         result = other.__new__(other)
         Symbolic.__init__(result, term)
         return result
@@ -341,7 +289,7 @@ class Uint(BitVector[N]):
                 other, Kind.BV_ZERO_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr3(other, other.width - 1, 0)
+            return self._from_expr3(other)
         else:
             return self._from_expr1(other, None, ())
 
@@ -376,7 +324,7 @@ class Int(BitVector[N]):
                 other, Kind.BV_SIGN_EXTEND, (other.width - self.width,)
             )
         elif self.width > other.width:
-            return self._from_expr3(other, other.width - 1, 0)
+            return self._from_expr3(other)
         else:
             return self._from_expr1(other, None, ())
 
@@ -479,3 +427,63 @@ class Solver:
         if not self._current or last_check is not self:
             raise ValueError("solver is not ready for model evaluation.")
         return bv._evaluate()  # pyright: ignore[reportPrivateUsage]
+
+
+class Optimizations:
+    @classmethod
+    def raise_ite(
+        cls, term: BitwuzlaTerm, op: Callable[[BitwuzlaTerm], BitwuzlaTerm]
+    ) -> BitwuzlaTerm:
+        if not OPTIMIZE or term.get_kind() != Kind.ITE:
+            return op(term)
+        cond, term1, term2 = term.get_children()
+        return BZLA.mk_term(Kind.ITE, (cond, op(term1), op(term2)))
+
+    @classmethod
+    def stack_shifts(
+        cls, kind: Kind, width: int, term1: BitwuzlaTerm, term2: BitwuzlaTerm
+    ) -> BitwuzlaTerm:
+        if (
+            not OPTIMIZE
+            or kind not in (Kind.BV_SHL, Kind.BV_SHR)
+            or term1.get_kind() != kind
+            or not term2.is_bv_value()
+        ):
+            return BZLA.mk_term(kind, (term1, term2))
+        (base, a) = term1.get_children()
+        if not a.is_bv_value():
+            return BZLA.mk_term(kind, (term1, term2))
+
+        _reset_solver()
+        shift = int(BZLA.get_value_str(term2), 2) + int(BZLA.get_value_str(a), 2)
+        if shift > width:
+            return BZLA.mk_bv_value(term1.get_sort(), 0)  # unsigned shifts only!
+        shift = BZLA.mk_bv_value(term1.get_sort(), shift)
+        return BZLA.mk_term(kind, (base, shift))
+
+    @classmethod
+    def rewrite_extract_shift(
+        cls, term: BitwuzlaTerm, width: int, bits: int
+    ) -> BitwuzlaTerm:
+        if not OPTIMIZE or (kind := term.get_kind()) not in (
+            Kind.BV_SHL,
+            Kind.BV_SHR,
+        ):
+            return BZLA.mk_term(Kind.BV_EXTRACT, (term,), (bits - 1, 0))
+
+        (base, shift) = term.get_children()
+        if not shift.is_bv_value():
+            return BZLA.mk_term(Kind.BV_EXTRACT, (term,), (bits - 1, 0))
+
+        _reset_solver()
+        high, low, shift = bits - 1, 0, int(BZLA.get_value_str(shift), 2)
+        match kind:
+            case Kind.BV_SHL:
+                if shift >= bits:
+                    return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
+            case Kind.BV_SHR:
+                if shift >= width:
+                    return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
+                elif bits + shift - 1 < width:
+                    high, low, term = high + shift, low + shift, base
+        return BZLA.mk_term(Kind.BV_EXTRACT, (term,), (high, low))
