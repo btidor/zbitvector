@@ -47,7 +47,7 @@ BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.PRODUCE_MODELS, True)
 BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 
-OPTIMIZE = os.getenv("ZBITVECTOR_OPTIMIZE", "1").lower() in ("true", "t", "1")
+OPTIMIZE = os.getenv("ZBITVECTOR_OPTIMIZE", "0").lower() in ("true", "t", "1")
 
 # We have to use a single, global Bitwuzla instance because all terms are
 # associated with an instance and can't be transferred to another. Therefore, we

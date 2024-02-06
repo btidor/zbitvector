@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Hashable
 from typing import Any, Literal, TypeVar, Union
 
@@ -7,6 +8,8 @@ import pytest
 
 from zbitvector import Array, Constraint, Int, Solver, Uint
 from zbitvector.conftest import Int8, Uint8, Uint64
+
+OPTIMIZE = os.getenv("ZBITVECTOR_OPTIMIZE", "0").lower() in ("true", "t", "1")
 
 
 def test_bitvector_validations():
@@ -142,6 +145,7 @@ def test_array_equality():
             pass
 
 
+@pytest.mark.skipif(not OPTIMIZE, reason="optimizations disabled")
 def test_ite_optimizations():
     t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
     t = t >> Uint8(4)
@@ -158,6 +162,7 @@ def test_ite_optimizations():
     assert str(t).index("ITEB") < str(t).index("ITEA")
 
 
+@pytest.mark.skipif(not OPTIMIZE, reason="optimizations disabled")
 def test_shift_optimizations():
     v = Uint64("SHIFT")
     assert str(v << Uint64(8) << Uint64(8)) == str(v << Uint64(16))
