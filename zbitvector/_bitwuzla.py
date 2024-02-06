@@ -477,13 +477,12 @@ class Optimizations:
 
         _reset_solver()
         high, low, shift = bits - 1, 0, int(BZLA.get_value_str(shift), 2)
-        match kind:
-            case Kind.BV_SHL:
-                if shift >= bits:
-                    return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
-            case Kind.BV_SHR:
-                if shift >= width:
-                    return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
-                elif bits + shift - 1 < width:
-                    high, low, term = high + shift, low + shift, base
+        if kind == Kind.BV_SHL:
+            if shift >= bits:
+                return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
+        else:
+            if shift >= width:
+                return BZLA.mk_bv_value(BZLA.mk_bv_sort(bits), 0)
+            elif bits + shift - 1 < width:
+                high, low, term = high + shift, low + shift, base
         return BZLA.mk_term(Kind.BV_EXTRACT, (term,), (high, low))
