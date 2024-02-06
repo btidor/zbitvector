@@ -57,3 +57,10 @@ by setting an environment variable::
 
     pip install z3-solver
     ZBITVECTOR_SOLVER=z3 python ...
+
+
+TODO
+note supported OSes
+note OPTIMIZE flag (experimental, may regress performance - DISABLE BY DEFAULT)
+https://cibuildwheel.readthedocs.io/en/stable/cpp_standards/
+upgrade cirrus to sonoma
