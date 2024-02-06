@@ -7,7 +7,9 @@ pyright
 ruff
 
 # Toolchain
+auditwheel
 build
+patchelf
 twine
 wheel
 
