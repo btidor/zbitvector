@@ -60,8 +60,7 @@ bdist_task:
         # Workaround for error "ld: branch8 out of range 385198 in
         # ___gmpn_add_nc_x86_64". See:
         # https://gmplib.org/list-archives/gmp-bugs/2023-September/005393.html
-        CIBW_BEFORE_ALL: "sudo arch -x86_64 make ci"
-        LDFLAGS: "-ld_classic"
+        CIBW_BEFORE_ALL: "sudo arch -x86_64 -e LDFLAGS='-ld_classic' make ci"
   setup_script:
     - git tag -l
     - python3 -m pip install cibuildwheel==2.16.5
