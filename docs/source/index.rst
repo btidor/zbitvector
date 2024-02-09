@@ -42,18 +42,35 @@ Features
 Installation
 ============
 
-zbitvector requires Python 3.8 or later. Pre-built binary wheels are available
-for macOS and Linux on x86-64 and AArch64::
+Pre-built binary wheels are available on PyPI::
 
     pip install zbitvector
 
-To build from source instead, first `build Bitwuzla`_ using :code:`./configure
---shared` and install the library by running :code:`make install`.
+Wheels are built for the x86-64 and AArch64 architectures and support
+these operating systems:
+
+* macOS 10.9+
+* Linux with glibc 2.17+ (*manylinux2014*)
+* Linux with musl 1.1+ (*musllinux_1_1*)
+
+zbitvector requires Python 3.8 or later.
+
+To build from source, first `build Bitwuzla`_ using :code:`./configure --shared`
+and install the library by running :code:`make install`.
 
 .. _build Bitwuzla: https://github.com/bitwuzla/bitwuzla#readme
+
+Runtime Options
+===============
 
 zbitvector uses the Bitwuzla solver by default, but can be configured to use Z3
 by setting an environment variable::
 
     pip install z3-solver
     ZBITVECTOR_SOLVER=z3 python ...
+
+zbitvector includes experimental optimizations which rewrite shift, extract and
+if-then-else to be more compact and readable. These optimizations may cause
+performance regressions. Try them out with::
+
+    ZBITVECTOR_OPTIMIZE=1 python ...
