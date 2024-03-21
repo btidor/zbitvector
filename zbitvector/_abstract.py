@@ -150,16 +150,13 @@ class Constraint(Symbolic):
         raise NotImplementedError
 
     @overload
-    def ite(self, then: Uint[N], else_: Uint[N], /) -> Uint[N]:
-        ...
+    def ite(self, then: Uint[N], else_: Uint[N], /) -> Uint[N]: ...
 
     @overload
-    def ite(self, then: Int[N], else_: Int[N], /) -> Int[N]:
-        ...
+    def ite(self, then: Int[N], else_: Int[N], /) -> Int[N]: ...
 
     @overload
-    def ite(self, then: Constraint, else_: Constraint, /) -> Constraint:
-        ...
+    def ite(self, then: Constraint, else_: Constraint, /) -> Constraint: ...
 
     def ite(self, then: Symbolic, else_: Symbolic, /) -> Symbolic:
         r"""
@@ -220,12 +217,10 @@ class BitVector(Symbolic, Generic[N]):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __lt__(self, other: Self, /) -> Constraint:
-        ...
+    def __lt__(self, other: Self, /) -> Constraint: ...
 
     @abc.abstractmethod
-    def __le__(self, other: Self, /) -> Constraint:
-        ...
+    def __le__(self, other: Self, /) -> Constraint: ...
 
     def __invert__(self) -> Self:
         """
@@ -323,12 +318,10 @@ class BitVector(Symbolic, Generic[N]):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __truediv__(self, other: Self, /) -> Self:
-        ...
+    def __truediv__(self, other: Self, /) -> Self: ...
 
     @abc.abstractmethod
-    def __mod__(self, other: Self, /) -> Self:
-        ...
+    def __mod__(self, other: Self, /) -> Self: ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
         """
@@ -346,8 +339,7 @@ class BitVector(Symbolic, Generic[N]):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __rshift__(self, other: Uint[N], /) -> Self:
-        ...
+    def __rshift__(self, other: Uint[N], /) -> Self: ...
 
 
 class Uint(BitVector[N]):
@@ -424,12 +416,10 @@ class Uint(BitVector[N]):
         raise NotImplementedError
 
     @overload
-    def into(self: Uint[N], other: type[Int[N]], /) -> Int[N]:
-        ...
+    def into(self: Uint[N], other: type[Int[N]], /) -> Int[N]: ...
 
     @overload
-    def into(self: Uint[N], other: type[Uint[M]], /) -> Uint[M]:
-        ...
+    def into(self: Uint[N], other: type[Uint[M]], /) -> Uint[M]: ...
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         """
@@ -558,12 +548,10 @@ class Int(BitVector[N]):
         raise NotImplementedError
 
     @overload
-    def into(self: Int[N], other: type[Uint[N]], /) -> Uint[N]:
-        ...
+    def into(self: Int[N], other: type[Uint[N]], /) -> Uint[N]: ...
 
     @overload
-    def into(self: Int[N], other: type[Int[M]], /) -> Int[M]:
-        ...
+    def into(self: Int[N], other: type[Int[M]], /) -> Int[M]: ...
 
     def into(self, other: type[BitVector[M]], /) -> BitVector[M]:
         """

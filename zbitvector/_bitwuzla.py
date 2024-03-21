@@ -101,8 +101,7 @@ class Symbolic(abc.ABC):
         return result
 
     @abc.abstractmethod
-    def _evaluate(self) -> bool | int:
-        ...
+    def _evaluate(self) -> bool | int: ...
 
     def __copy__(self) -> Self:
         return self
@@ -218,12 +217,10 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         return result
 
     @abc.abstractmethod
-    def __lt__(self, other: Self, /) -> Constraint:
-        ...
+    def __lt__(self, other: Self, /) -> Constraint: ...
 
     @abc.abstractmethod
-    def __le__(self, other: Self, /) -> Constraint:
-        ...
+    def __le__(self, other: Self, /) -> Constraint: ...
 
     def __invert__(self) -> Self:
         return self._from_expr(Kind.BV_NOT, self)
@@ -247,19 +244,16 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         return self._from_expr2(Kind.BV_MUL, other)
 
     @abc.abstractmethod
-    def __truediv__(self, other: Self, /) -> Self:
-        ...
+    def __truediv__(self, other: Self, /) -> Self: ...
 
     @abc.abstractmethod
-    def __mod__(self, other: Self, /) -> Self:
-        ...
+    def __mod__(self, other: Self, /) -> Self: ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr2(Kind.BV_SHL, other)
 
     @abc.abstractmethod
-    def __rshift__(self, other: Uint[N], /) -> Self:
-        ...
+    def __rshift__(self, other: Uint[N], /) -> Self: ...
 
 
 class Uint(BitVector[N]):

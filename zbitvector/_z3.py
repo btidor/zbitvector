@@ -152,12 +152,10 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         return z3.Z3_mk_bv_sort(CTX, width)
 
     @abc.abstractmethod
-    def __lt__(self, other: Self, /) -> Constraint:
-        ...
+    def __lt__(self, other: Self, /) -> Constraint: ...
 
     @abc.abstractmethod
-    def __le__(self, other: Self, /) -> Constraint:
-        ...
+    def __le__(self, other: Self, /) -> Constraint: ...
 
     def __invert__(self) -> Self:
         return self._from_expr(z3.Z3_mk_bvnot, self)
@@ -181,19 +179,16 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
         return self._from_expr(z3.Z3_mk_bvmul, self, other)
 
     @abc.abstractmethod
-    def __truediv__(self, other: Self, /) -> Self:
-        ...
+    def __truediv__(self, other: Self, /) -> Self: ...
 
     @abc.abstractmethod
-    def __mod__(self, other: Self, /) -> Self:
-        ...
+    def __mod__(self, other: Self, /) -> Self: ...
 
     def __lshift__(self, other: Uint[N], /) -> Self:
         return self._from_expr(z3.Z3_mk_bvshl, self, other)
 
     @abc.abstractmethod
-    def __rshift__(self, other: Uint[N], /) -> Self:
-        ...
+    def __rshift__(self, other: Uint[N], /) -> Self: ...
 
 
 class Uint(BitVector[N]):
