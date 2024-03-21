@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from collections.abc import Hashable
 from typing import Any, Literal, TypeVar, Union
 
@@ -8,8 +7,6 @@ import pytest
 
 from zbitvector import Array, Constraint, Int, Solver, Uint
 from zbitvector.conftest import Int8, Uint8, Uint64
-
-OPTIMIZE = os.getenv("ZBITVECTOR_OPTIMIZE", "0").lower() in ("true", "t", "1")
 
 
 def test_bitvector_validations():
@@ -143,41 +140,6 @@ def test_array_equality():
     with pytest.raises(TypeError, match="arrays cannot be compared for equality"):
         if A == B:  # type: ignore
             pass
-
-
-@pytest.mark.skipif(not OPTIMIZE, reason="optimizations disabled")
-def test_ite_optimizations():
-    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
-    t = t >> Uint8(4)
-    t = t >> Uint8(3)
-    assert t.reveal() == 0
-
-    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
-    t = t >> Uint8(4)
-    t = t.into(Uint64) >> Uint64(3)
-    assert t.reveal() == 0
-
-    t = Constraint("ITEA").ite(Uint8(0x7F), Uint8(0x1F))
-    t = Constraint("ITEB").ite(t, Uint8(0))
-    assert str(t).index("ITEB") < str(t).index("ITEA")
-
-
-@pytest.mark.skipif(not OPTIMIZE, reason="optimizations disabled")
-def test_shift_optimizations():
-    v = Uint64("SHIFT")
-    assert str(v << Uint64(8) << Uint64(8)) == str(v << Uint64(16))
-    assert str(v >> Uint64(8) >> Uint64(8)) == str(v >> Uint64(16))
-
-    assert (v << Uint64(8)).into(Uint8).reveal() == 0
-    assert ((v & Uint64(0x00FFFFFFFFFFFFFF)) >> Uint64(56)).into(Uint8).reveal() == 0
-    assert str((v >> Uint64(34)).into(Uint8)) == "Uint8(`((_ extract 41 34) SHIFT)`)"
-
-    c = Constraint("SHC").ite(v << Uint64(8), Uint64(0))
-    s = str(c << Uint64(8))
-    assert "(bvshl SHIFT #x0000000000000010)" in s or "((_ extract 47 0) SHIFT)" in s
-
-    c = Constraint("SHC").ite(v >> Uint64(8), Uint64(0))
-    assert "((_ extract 23 16) SHIFT)" in str((c >> Uint64(8)).into(Uint8))
 
 
 def test_solver_validations():

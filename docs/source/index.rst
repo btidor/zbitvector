@@ -68,9 +68,3 @@ by setting an environment variable::
 
     pip install z3-solver
     ZBITVECTOR_SOLVER=z3 python ...
-
-zbitvector includes experimental optimizations which rewrite shift, extract and
-if-then-else to be more compact and readable. These optimizations may cause
-performance regressions. Try them out with::
-
-    ZBITVECTOR_OPTIMIZE=1 python ...
