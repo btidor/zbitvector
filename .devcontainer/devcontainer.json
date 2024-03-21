@@ -4,6 +4,9 @@
 		"dockerfile": "Dockerfile"
 	},
 	"postCreateCommand": "pip install -r requirements.txt",
+	"containerEnv": {
+		"PYRIGHT_PYTHON_PYLANCE_VERSION": "latest-release"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
