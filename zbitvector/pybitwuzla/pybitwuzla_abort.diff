@@ -3,7 +3,7 @@ standard exception.
 
 --- pybitwuzla_abort.cpp	2023-05-14 18:37:28.408284186 +0000
 +++ pybitwuzla_abort.cpp	2023-05-14 18:39:13.156495534 +0000
-@@ -12,22 +12,12 @@
+@@ -10,22 +10,12 @@
 
  #include "pybitwuzla_abort.h"
 
@@ -28,7 +28,7 @@ standard exception.
  }
 
  const char*
-@@ -37,7 +27,7 @@
+@@ -35,7 +25,7 @@
    {
      throw;
    }

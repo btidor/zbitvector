@@ -1,7 +1,6 @@
---- pybitwuzla_enums.pxd	2023-05-12 19:35:46.373442655 +0000
-+++ pybitwuzla_enums.pxd	2023-05-12 19:35:50.605419396 +0000
-@@ -2,7 +2,7 @@
-
+--- pybitwuzla_enums.pxd	2024-10-26 01:37:51.531945661 +0000
++++ pybitwuzla_enums.pxd	2024-10-26 01:38:05.660999138 +0000
+@@ -1,6 +1,6 @@
  from enum import Enum
 
 -cdef extern from "bitwuzla.h":

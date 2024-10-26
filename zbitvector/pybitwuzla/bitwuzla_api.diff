@@ -1,6 +1,6 @@
 --- bitwuzla_api.pxd	2023-05-12 19:34:04.869958109 +0000
 +++ bitwuzla_api.pxd	2023-05-12 19:34:23.529869817 +0000
-@@ -24,12 +24,7 @@
+@@ -22,12 +22,7 @@
      void pybitwuzla_abort_fun(const char* msg)
      const char * pybitwuzla_get_err_msg()
 

@@ -17,14 +17,15 @@ all: $(TARGETS)
 
 clean:
 	-rm $(TARGETS)
+	-rm *.orig *.rej
 	-rm ../pybitwuzla.pyi
 
 stubs: ../pybitwuzla.pyi
 
 pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/c/bitwuzla.h
 	python3 $^ $@
-	sed -i '1 i\# $(HEADER)\n' $@
 	patch < pybitwuzla_enums.diff
+	sed -i '1 i\# $(HEADER)\n' $@
 
 ../pybitwuzla.pyi: stubs.py
 	python3 $< > $@
@@ -37,15 +38,15 @@ pybitwuzla_enums.pxd: $(CHECKOUT)/src/api/python/mkenums.py $(CHECKOUT)/src/api/
 
 %.cpp: $(CHECKOUT)/src/api/python/%.cpp %.diff
 	cp $< $@
-	sed -i '1 i\// $(HEADER)\n' $@
 	patch < $(word 2,$^)
+	sed -i '1 i\// $(HEADER)\n' $@
 
 %.pxd: $(CHECKOUT)/src/api/python/%.pxd %.diff
 	cp $< $@
-	sed -i '1 i\# $(HEADER)\n' $@
 	patch < $(word 2,$^)
+	sed -i '1 i\# $(HEADER)\n' $@
 
 %.pyx: $(CHECKOUT)/src/api/python/%.pyx %.diff
 	cp $< $@
-	sed -i '1 i\# $(HEADER)\n' $@
 	patch < $(word 2,$^)
+	sed -i '1 i\# $(HEADER)\n' $@
