@@ -3,6 +3,7 @@ typing_extensions
 z3-solver==4.12.2.0
 
 # Linters
+black
 pyright
 ruff
 

@@ -14,6 +14,7 @@ class Bitwuzla:
         :param formula: Boolean term.
         :type formula: BitwuzlaTerm"""
         ...
+
     def assume_formula(self, formula: BitwuzlaTerm) -> None:
         """assume_formula(formula,...)
 
@@ -34,6 +35,7 @@ class Bitwuzla:
         :param formula: Boolean term.
         :type formula: BitwuzlaTerm"""
         ...
+
     def check_sat(self) -> Result:
         """Check satisfiability of asserted and assumed input formulas.
 
@@ -57,10 +59,12 @@ class Bitwuzla:
             :func:`~pybitwuzla.Bitwuzla.get_value`,
             :func:`~pybitwuzla.Bitwuzla.get_value_str`"""
         ...
+
     def copyright(self) -> str:
         """:return: The copyright information.
         :rtype: str"""
         ...
+
     def dump_formula(self, fmt: str = "smt2") -> str:
         """dump_formula(fmt = "smt2")
 
@@ -72,6 +76,7 @@ class Bitwuzla:
         :return: String representation of formula in format ``fmt``.
         :rtype: str"""
         ...
+
     def fixate_assumptions(self) -> None:
         """Assert all assumptions added since the last
         :func:`~pybitwuzla.Bitwuzla.check_sat` call as assertions.
@@ -79,6 +84,7 @@ class Bitwuzla:
         .. seealso::
              :func:`~pybitwuzla.Bitwuzla.assume_formula`."""
         ...
+
     def get_model(self, fmt: str = "smt2") -> str:
         """get_model(fmt = "smt2")
 
@@ -90,6 +96,7 @@ class Bitwuzla:
         :return: String representation of model in format ``fmt``.
         :rtype: str"""
         ...
+
     def get_option(self, opt: Option) -> None:
         """get_option(opt)
 
@@ -102,6 +109,7 @@ class Bitwuzla:
         .. seealso::
              For a list of available options see :class:`~pybitwuzla.Option`"""
         ...
+
     def get_unsat_assumptions(self) -> List[BitwuzlaTerm]:
         """Return list of unsatisfiable assumptions previously added via
         :func:`~pybitwuzla.Bitwuzla.assume_formula`.
@@ -112,6 +120,7 @@ class Bitwuzla:
         :return:  List of unsatisfiable assumptions
         :rtype:   list(BitwuzlaTerm)"""
         ...
+
     def get_unsat_core(self) -> List[BitwuzlaTerm]:
         """Return list of unsatisfiable assertions previously added via
         :func:`~pybitwuzla.Bitwuzla.assert_formula`.
@@ -122,6 +131,7 @@ class Bitwuzla:
         :return:  list of unsatisfiable assertions
         :rtype:   list(BitwuzlaTerm)"""
         ...
+
     def get_value(self, term: BitwuzlaTerm) -> BitwuzlaTerm:
         """get_value(term)
 
@@ -134,6 +144,7 @@ class Bitwuzla:
         :return: Term representing the model value of `term`.
         :rtype: BitwuzlaTerm"""
         ...
+
     def get_value_str(self, term: BitwuzlaTerm) -> Any:
         """get_value_str(term)
 
@@ -152,10 +163,12 @@ class Bitwuzla:
             - functions: dictionary mapping tuples of arguments to values
             - rounding mode: string representation of rounding mode value"""
         ...
+
     def git_id(self) -> str:
         """:return: The git commit sha.
         :rtype: str"""
         ...
+
     def is_unsat_assumption(self, assumption: BitwuzlaTerm) -> List[bool]:
         """is_unsat_assumption(assumption,...)
 
@@ -174,6 +187,7 @@ class Bitwuzla:
                   assumption at given index is true or false.
         :rtype:   list(bool)"""
         ...
+
     def mk_array_sort(self, index: BitwuzlaSort, elem: BitwuzlaSort) -> BitwuzlaSort:
         """mk_array_sort(index, elem)
 
@@ -187,12 +201,14 @@ class Bitwuzla:
         :return:  Array sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def mk_bool_sort(self) -> BitwuzlaSort:
         """Create a Boolean sort.
 
         :return: Sort of type Boolean.
         :rtype: BitwuzlaSort"""
         ...
+
     def mk_bv_max_signed(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_bv_max_signed(sort)
 
@@ -206,6 +222,7 @@ class Bitwuzla:
                  1.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_bv_min_signed(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_bv_min_signed(sort)
 
@@ -219,6 +236,7 @@ class Bitwuzla:
                  0.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_bv_ones(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_bv_ones(sort)
 
@@ -231,6 +249,7 @@ class Bitwuzla:
                  where all bits are set to 1.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_bv_sort(self, width: int) -> BitwuzlaSort:
         """mk_bv_sort(width)
 
@@ -242,6 +261,7 @@ class Bitwuzla:
         :return:  Bit-vector sort of bit width ``width``.
         :rtype: pybitwuzla.BitwuzlaSort"""
         ...
+
     def mk_bv_value(self, sort: BitwuzlaSort, value: str | int) -> BitwuzlaTerm:
         """mk_bv_value(sort, value)
 
@@ -258,6 +278,7 @@ class Bitwuzla:
         :return: A term representing the bit-vector value.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_const(self, sort: BitwuzlaSort, symbol: str | None = None) -> BitwuzlaTerm:
         """mk_const(sort, symbol = None)
 
@@ -271,6 +292,7 @@ class Bitwuzla:
         :return: A term representing the constant.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_const_array(self, sort: BitwuzlaSort, value: BitwuzlaTerm) -> BitwuzlaTerm:
         """mk_const_array(sort, value)
 
@@ -285,6 +307,7 @@ class Bitwuzla:
         :return: A term representing a constant array of given sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_nan(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_fp_nan(sort)
 
@@ -297,6 +320,7 @@ class Bitwuzla:
                  floating-point sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_neg_inf(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_fp_neg_inf(sort)
 
@@ -309,6 +333,7 @@ class Bitwuzla:
                  value of given floating-point sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_neg_zero(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_fp_neg_zero(sort)
 
@@ -321,6 +346,7 @@ class Bitwuzla:
                  of given floating-point sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_pos_inf(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_fp_pos_inf(sort)
 
@@ -333,6 +359,7 @@ class Bitwuzla:
                  value of given floating-point sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_pos_zero(self, sort: BitwuzlaSort) -> BitwuzlaTerm:
         """mk_fp_pos_zero(sort)
 
@@ -345,6 +372,7 @@ class Bitwuzla:
                  of given floating-point sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fp_sort(self, exp_size: int, sig_size: int) -> BitwuzlaSort:
         """mk_fp_sort(exp_size, sig_size)
 
@@ -359,6 +387,7 @@ class Bitwuzla:
         :return: Floating-point sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def mk_fp_value(
         self,
         sort: BitwuzlaSort,
@@ -388,6 +417,7 @@ class Bitwuzla:
           :func:`~pybitwuzla.Bitwuzla.mk_bv_value` for the supported value
           format for ``sign``, ``exponent``, and ``significand``."""
         ...
+
     def mk_fp_value_from(
         self, sort: BitwuzlaSort, rm: BitwuzlaTerm, value: str
     ) -> BitwuzlaTerm:
@@ -410,6 +440,7 @@ class Bitwuzla:
                  point value with given sort.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_fun_sort(self, domain: List[Any], codomain: BitwuzlaSort) -> BitwuzlaSort:
         """mk_fun_sort(domain, codomain)
 
@@ -423,6 +454,7 @@ class Bitwuzla:
         :return:  Function sort, which maps ``domain`` to ``codomain``.
         :rtype: BitwuzlaSort"""
         ...
+
     def mk_rm_sort(self) -> BitwuzlaSort:
         """mk_rm_sort()
 
@@ -431,6 +463,7 @@ class Bitwuzla:
         :return: Rounding mode sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def mk_rm_value(self, rm: RoundingMode) -> BitwuzlaTerm:
         """mk_rm_value(rm)
 
@@ -442,6 +475,7 @@ class Bitwuzla:
         :return: A term representing the rounding mode value.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_term(
         self,
         kind: Kind,
@@ -462,6 +496,7 @@ class Bitwuzla:
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
         ...
+
     def mk_var(self, sort: BitwuzlaSort, symbol: str | None = None) -> BitwuzlaTerm:
         """mk_var(sort, symbol = None)
 
@@ -479,6 +514,7 @@ class Bitwuzla:
              This creates a variable to be bound by terms of kind
              :class:`~pybitwuzla.Kind.LAMBDA`."""
         ...
+
     def pop(self, levels: int = 1) -> None:
         """pop(levels = 1)
 
@@ -496,6 +532,7 @@ class Bitwuzla:
         .. seealso::
             :func:`~pybitwuzla.Bitwuzla.assume_formula`"""
         ...
+
     def push(self, levels: int = 1) -> None:
         """push(levels = 1)
 
@@ -513,6 +550,7 @@ class Bitwuzla:
         .. seealso::
             :func:`~pybitwuzla.Bitwuzla.assume_formula`"""
         ...
+
     def reset_assumptions(self) -> None:
         """Remove all assumptions added since the last
         :func:`~pybitwuzla.Bitwuzla.check_sat` call.
@@ -520,6 +558,7 @@ class Bitwuzla:
         .. seealso::
              :func:`~pybitwuzla.Bitwuzla.assume_formula`."""
         ...
+
     def set_option(self, opt: Option, value: str | Option | int) -> None:
         """set_option(opt, value)
 
@@ -533,6 +572,7 @@ class Bitwuzla:
         .. seealso::
              For a list of available options see :class:`~pybitwuzla.Option`"""
         ...
+
     def simplify(self) -> Result:
         """Simplify current input formula.
 
@@ -546,6 +586,7 @@ class Bitwuzla:
             Each call to :func:`~pybitwuzla.Bitwuzla.check_sat`
             simplifies the input formula as a preprocessing step."""
         ...
+
     def substitute(
         self,
         terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...] | BitwuzlaTerm,
@@ -565,6 +606,7 @@ class Bitwuzla:
         :return: List of terms with substitutions applied.
         :rtype: list(BitwuzlaTerm)"""
         ...
+
     def version(self) -> str:
         """:return: The version number.
         :rtype: str"""
@@ -579,64 +621,76 @@ class BitwuzlaSort:
         :return: Element sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def array_get_index(self) -> BitwuzlaSort:
         """Get index sort of array sort.
 
         :return: Index sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def bv_get_size(self) -> int:
         """Get size of bit-vector sort.
 
         :return: Size of bit-vector sort.
         :rtype: int"""
         ...
+
     def fp_get_exp_size(self) -> int:
         """Get size of exponent of floating-point sort.
 
         :return: Size of exponent.
         :rtype: int"""
         ...
+
     def fp_get_sig_size(self) -> int:
         """Get size of significand of floating-point sort.
 
         :return: Size of significand.
         :rtype: int"""
         ...
+
     def fun_get_arity(self) -> int:
         """Get arity of function sort.
 
         :return: Function arity.
         :rtype: int"""
         ...
+
     def fun_get_codomain(self) -> BitwuzlaSort:
         """Get codomain sort of function sort.
 
         :return: Codomain sort.
         :rtype: BitwuzlaSort"""
         ...
+
     def fun_get_domain_sorts(self) -> List[BitwuzlaSort]:
         """Get domain sorts of function sort.
 
         :return: Domain sorts.
         :rtype: list(BitwuzlaSort)"""
         ...
+
     def is_array(self) -> bool:
         """:return: True if sort is an array sort, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv(self) -> bool:
         """:return: True if sort is a bit-vector sort, False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp(self) -> bool:
         """:return: True if sort is a floating-point sort, False otherwise.
         :rtype: bool"""
         ...
+
     def is_fun(self) -> bool:
         """:return: True if sort is a function sort, False otherwise.
         :rtype: bool"""
         ...
+
     def is_rm(self) -> bool:
         """:return: True if sort is a rounding mode sort, False otherwise.
         :rtype: bool"""
@@ -654,22 +708,27 @@ class BitwuzlaTerm:
         :return: String representation of the term in format ``fmt``.
         :rtype: str"""
         ...
+
     def get_children(self) -> List[BitwuzlaTerm]:
         """:return: The children of the term.
         :rtype: list(BitwuzlaTerm)"""
         ...
+
     def get_indices(self) -> List[int]:
         """:return: Indices of indexed operator.
         :rtype: list(int)"""
         ...
+
     def get_kind(self) -> Kind:
         """:return: Operator kind of term.
         :rtype: Kind"""
         ...
+
     def get_sort(self) -> BitwuzlaSort:
         """:return: The sort of the term.
         :rtype: BitwuzlaSort"""
         ...
+
     def get_symbol(self) -> str | None:
         """:return: The symbol of the term.
         :rtype: str or None
@@ -677,105 +736,129 @@ class BitwuzlaTerm:
         .. seealso::
             :func:`~pybitwuzla.BitwuzlaTerm.set_symbol`"""
         ...
+
     def is_array(self) -> bool:
         """:return: True if term is an array, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bound_var(self) -> bool:
         """:return: True if term is a bound variable, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv(self) -> bool:
         """:return: True if term is a bit-vector, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value(self) -> bool:
         """:return: True if term is a bit-vector value, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value_max_signed(self) -> bool:
         """:return: True if term is a bit-vector maximum signed value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value_min_signed(self) -> bool:
         """:return: True if term is a bit-vector minimum signed value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value_one(self) -> bool:
         """:return: True if term is a bit-vector value one, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value_ones(self) -> bool:
         """:return: True if term is a bit-vector value ones, False otherwise.
         :rtype: bool"""
         ...
+
     def is_bv_value_zero(self) -> bool:
         """:return: True if term is a bit-vector value zero, False otherwise.
         :rtype: bool"""
         ...
+
     def is_const(self) -> bool:
         """:return: True if term is a constant, False otherwise.
         :rtype: bool"""
         ...
+
     def is_const_array(self) -> bool:
         """:return: True if term is a constant array, False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp(self) -> bool:
         """:return: True if term is a floating-point, False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value(self) -> bool:
         """:return: True if term is a floating-point value, False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value_nan(self) -> bool:
         """:return: True if term is a floating-point NaN value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value_neg_inf(self) -> bool:
         """:return: True if term is a floating-point negative infinity value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value_neg_zero(self) -> bool:
         """:return: True if term is a floating-point negative zero value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value_pos_inf(self) -> bool:
         """:return: True if term is a floating-point positive infinity value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_fp_value_pos_zero(self) -> bool:
         """:return: True if term is a floating-point positive zero value,
                  False otherwise.
         :rtype: bool"""
         ...
+
     def is_fun(self) -> bool:
         """:return: True if term is a function, False otherwise.
         :rtype: bool"""
         ...
+
     def is_indexed(self) -> bool:
         """:return: True if term is indexed, False otherwise.
         :rtype: bool"""
         ...
+
     def is_rm(self) -> bool:
         """:return: True if term is a rounding mode, False otherwise.
         :rtype: bool"""
         ...
+
     def is_rm_value(self) -> bool:
         """:return: True if term is a rounding mode value, False otherwise.
         :rtype: bool"""
         ...
+
     def is_var(self) -> bool:
         """:return: True if term is a variable, False otherwise.
         :rtype: bool"""
         ...
+
     def set_symbol(self, symbol: str) -> None:
         """set_symbol(symbol)
 

@@ -19,8 +19,9 @@ RUN ln -sf /usr/bin/python3.8 /usr/bin/python3
 RUN pip install --upgrade cython pip
 
 # Bitwuzla
-ADD https://github.com/bitwuzla/bitwuzla.git#1230d80a5275ddf525da9c218c2bcd29c3130e49 /opt/bitwuzla
+RUN git clone https://github.com/bitwuzla/bitwuzla.git /opt/bitwuzla
 WORKDIR /opt/bitwuzla
+RUN git checkout 1230d80a5275ddf525da9c218c2bcd29c3130e49
 RUN ./contrib/setup-cadical.sh
 RUN ./contrib/setup-btor2tools.sh
 RUN ./contrib/setup-symfpu.sh
