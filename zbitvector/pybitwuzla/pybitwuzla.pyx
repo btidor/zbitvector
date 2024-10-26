@@ -1353,7 +1353,7 @@ cdef class Bitwuzla:
            :param terms: The argument terms.
            :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
            :param indices: The argument indices.
-           :type indices: tuple(int, ...) or None = None
+           :type indices: list(int) or tuple(int, ...) or None = None
 
            :return: A term representing an operation of given kind.
            :rtype: BitwuzlaTerm
@@ -1413,7 +1413,7 @@ cdef class Bitwuzla:
            :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)
 
            :return: List of terms with substitutions applied.
-           :rtype: list(BitwuzlaTerm)
+           :rtype: list(BitwuzlaTerm) or BitwuzlaTerm
         """
         if not isinstance(terms, BitwuzlaTerm) and not isinstance(terms, list):
             raise ValueError('Expected BitwuzlaTerm or list of ' \

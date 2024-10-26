@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, overload
 
 class Bitwuzla:
-    def assert_formula(self, formula: BitwuzlaTerm) -> None:
+    def assert_formula(self, *formula: BitwuzlaTerm) -> None:
         """assert_formula(formula,...)
 
         Assert one or more formulas.
@@ -15,7 +15,7 @@ class Bitwuzla:
         :type formula: BitwuzlaTerm"""
         ...
 
-    def assume_formula(self, formula: BitwuzlaTerm) -> None:
+    def assume_formula(self, *formula: BitwuzlaTerm) -> None:
         """assume_formula(formula,...)
 
         Assume one or more formulas.
@@ -169,7 +169,7 @@ class Bitwuzla:
         :rtype: str"""
         ...
 
-    def is_unsat_assumption(self, assumption: BitwuzlaTerm) -> List[bool]:
+    def is_unsat_assumption(self, *assumption: BitwuzlaTerm) -> List[bool]:
         """is_unsat_assumption(assumption,...)
 
         Determine if any of the given assumptions are false assumptions.
@@ -480,7 +480,7 @@ class Bitwuzla:
         self,
         kind: Kind,
         terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
-        indices: Tuple[int, ...] | None = None,
+        indices: List[int] | Tuple[int, ...] | None = None,
     ) -> BitwuzlaTerm:
         """mk_term(kind, terms, indices = None)
 
@@ -491,7 +491,7 @@ class Bitwuzla:
         :param terms: The argument terms.
         :type terms: list(BitwuzlaTerm) or tuple(BitwuzlaTerm, ...)
         :param indices: The argument indices.
-        :type indices: tuple(int, ...) or None = None
+        :type indices: list(int) or tuple(int, ...) or None = None
 
         :return: A term representing an operation of given kind.
         :rtype: BitwuzlaTerm"""
@@ -587,11 +587,23 @@ class Bitwuzla:
             simplifies the input formula as a preprocessing step."""
         ...
 
+    @overload
+    def substitute(
+        self,
+        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
+        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> List[BitwuzlaTerm]: ...
+    @overload
+    def substitute(
+        self,
+        terms: BitwuzlaTerm,
+        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> BitwuzlaTerm: ...
     def substitute(
         self,
         terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...] | BitwuzlaTerm,
         subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
-    ) -> List[BitwuzlaTerm]:
+    ) -> List[BitwuzlaTerm] | BitwuzlaTerm:
         """substitute(terms, subst_map)
 
         Substitute constants or variables in ``terms`` by applying
@@ -604,7 +616,7 @@ class Bitwuzla:
         :type subst_map: dict(BitwuzlaTerm,BitwuzlaTerm)
 
         :return: List of terms with substitutions applied.
-        :rtype: list(BitwuzlaTerm)"""
+        :rtype: list(BitwuzlaTerm) or BitwuzlaTerm"""
         ...
 
     def version(self) -> str:

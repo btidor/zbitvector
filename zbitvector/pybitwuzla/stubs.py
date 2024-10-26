@@ -11,7 +11,7 @@ from zbitvector import pybitwuzla  # type: ignore
 # ruff: noqa: D103, F541
 
 
-def munge(expr: str) -> str:
+def munge(expr: str, spec: inspect.FullArgSpec) -> str:
     expr = re.sub(r"(list|tuple|dict)([^(])", r"\1[Any]\2", expr)
     expr = re.sub(r"(list|tuple|dict)\(([^)]+)\)", r"\1[\2]", expr)
     expr = expr.replace(" or ", " | ")
@@ -21,14 +21,31 @@ def munge(expr: str) -> str:
     expr = expr.replace("uint32_t", "int")
     expr = expr.replace("pybitwuzla.", "")
     expr = expr.replace("BitwuzlaOption", "Option")
+    if spec.varargs is not None:
+        assert spec.varargs.endswith("s")
+        expr = expr.replace(spec.varargs[:-1], "*" + spec.varargs[:-1])
     return expr
 
 
 print("from __future__ import annotations")
 print()
 print("from enum import Enum")
-print("from typing import Any, Dict, List, Tuple")
+print("from typing import Any, Dict, List, Tuple, overload")
 print()
+
+SUBSTITUTE_OVERLOADS = """    @overload
+    def substitute(
+        self,
+        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
+        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> List[BitwuzlaTerm]: ...
+    @overload
+    def substitute(
+        self,
+        terms: BitwuzlaTerm,
+        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> BitwuzlaTerm: ...
+"""
 
 for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
     if not inspect.isclass(topic):
@@ -57,15 +74,19 @@ for name, topic in inspect.getmembers(pybitwuzla):  # type: ignore
             if name.startswith("__"):
                 continue
 
+            spec = inspect.getfullargspec(member)
             m = re.search(r":rtype:\s+(.+)\n", member.__doc__)
             if m is None:
                 ret = "None"
             else:
-                ret = munge(m.group(1))
+                ret = munge(m.group(1), spec)
+
+            if name == "substitute":
+                print(SUBSTITUTE_OVERLOADS)
 
             m = re.findall(r":type\s+([^:]+):\s+(.+)\n", member.__doc__)
             args = ["self"] + [f"{k}: {v}" for k, v in m]
-            print(f"    def {name}({munge(', '.join(args))}) -> {ret}:")
+            print(f"    def {name}({munge(', '.join(args), spec)}) -> {ret}:")
             print(f'        """{member.__doc__.strip()}"""')
             print(f"        ...")
             print()
