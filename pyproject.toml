@@ -34,6 +34,14 @@ test-command = """ \
     ZBITVECTOR_SOLVER=z3 pytest --pyargs --doctest-modules zbitvector
 """
 
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+manylinux-pypy_x86_64-image = "manylinux2014"
+manylinux-pypy_aarch64-image = "manylinux2014"
+
+musllinux-x86_64-image = "musllinux_1_1"
+musllinux-aarch64-image = "musllinux_1_1"
+
 # Z3 doesn't distribute pre-built binaries for these platforms
 [[tool.cibuildwheel.overrides]]
 select = "*{musllinux,aarch64}*"
