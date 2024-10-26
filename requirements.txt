@@ -1,6 +1,6 @@
 # Dependencies
 typing_extensions
-z3-solver==4.13.3.0
+z3-solver==4.12.2.0
 
 # Linters
 black
