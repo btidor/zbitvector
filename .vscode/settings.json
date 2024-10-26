@@ -11,5 +11,4 @@
         "**/.ruff_cache": true,
     },
     "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.typeCheckingMode": "strict",
 }

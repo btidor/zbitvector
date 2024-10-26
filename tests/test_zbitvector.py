@@ -26,7 +26,7 @@ def test_bitvector_validations():
         TypeError,
         match=r"integer passed to Int\[...\]; use Int\[Literal\[5\]\] instead",
     ):
-        Int[5]  # type: ignore
+        Int[5]
 
     with pytest.raises(TypeError, match="unsupported type parameter passed to Int"):
         Int[Literal["asdf"]]  # type: ignore
@@ -130,7 +130,7 @@ def test_hash():
 
     # Make sure this raises an error both at runtime and from the typechecker:
     with pytest.raises(TypeError, match="unhashable type"):
-        _ = {Array[Uint8, Uint8]("UHA"): 0}  # pyright: ignore[reportGeneralTypeIssues]
+        _ = {Array[Uint8, Uint8]("UHA"): 0}  # pyright: ignore[reportUnhashable]
 
 
 def test_array_equality():
