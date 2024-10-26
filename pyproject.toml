@@ -14,7 +14,14 @@ dependencies = ["typing-extensions >= 4.0"]
 "Source Code" = "https://github.com/btidor/zbitvector"
 
 [build-system]
-requires = ["cython", "setuptools", "setuptools_scm[toml]"]
+requires = [
+    "cython",
+    # Workaround for error "TypeError: 'NoneType' object is not subscriptable
+    # (key slice(None, None, None))". See:
+    # https://github.com/pypa/distutils/issues/283
+    "setuptools<72.2.0",
+    "setuptools_scm[toml]",
+]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
