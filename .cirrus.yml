@@ -50,7 +50,7 @@ bdist_task:
         image: ghcr.io/cirruslabs/macos-runner:sonoma
       env:
         CIBW_ARCHS: "arm64"
-        CIBW_BEFORE_ALL: "sudo make ci"
+        CIBW_BEFORE_ALL: "sudo -E make ci" # -E: pass through env vars
         PIP_BREAK_SYSTEM_PACKAGES: "1"
       use_compute_credits: true
     - name: "package / macosx-x86-64"
@@ -61,7 +61,7 @@ bdist_task:
         # Workaround for error "ld: branch8 out of range 385198 in
         # ___gmpn_add_nc_x86_64". See:
         # https://gmplib.org/list-archives/gmp-bugs/2023-September/005393.html
-        CIBW_BEFORE_ALL: "sudo arch -x86_64 -e LDFLAGS='-ld_classic' make ci"
+        CIBW_BEFORE_ALL: "sudo -E arch -x86_64 -e LDFLAGS='-ld_classic' make ci"
         PIP_BREAK_SYSTEM_PACKAGES: "1"
   setup_script:
     - git tag -l

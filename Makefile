@@ -54,3 +54,4 @@ $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 		./contrib/setup-symfpu.sh && \
 		./configure.sh --shared
 	cd $(DEPDIR)/bitwuzla/build && make -j4 && make install
+	touch -c $@  # fix mtime (for macOS)

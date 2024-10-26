@@ -42,6 +42,23 @@ manylinux-pypy_aarch64-image = "manylinux2014"
 musllinux-x86_64-image = "musllinux_1_1"
 musllinux-aarch64-image = "musllinux_1_1"
 
+[tool.cibuildwheel.macos]
+# Problem: on macOS runners, libgmp is pre-installed through Homebrew (in
+# /opt/homebrew). This version of the library isn't backwards-compatible with
+# older macOS releases, so we always want to use our version (in /usr/local).
+
+# This makes Bitwuzla build against our version of libgmp:
+environment = { CMAKE_PREFIX_PATH = "/usr/local" }
+
+# This makes `delocate` link against our version of the libraries (and prints
+# debugging information). Note that for security reasons, DYLD_LIBRARY_PATH must
+# be explicitly set per-call:
+# https://github.com/pypa/cibuildwheel/issues/816#issuecomment-916197079
+repair-wheel-command = """ \
+    DYLD_LIBRARY_PATH=/usr/local/lib delocate-listdeps {wheel} && \
+    DYLD_LIBRARY_PATH=/usr/local/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+"""
+
 # Z3 doesn't distribute pre-built binaries for these platforms
 [[tool.cibuildwheel.overrides]]
 select = "*{musllinux,aarch64}*"
