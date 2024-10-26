@@ -17,7 +17,7 @@ M = TypeVar("M", bound=int)
 
 class Symbolic(abc.ABC):
     """
-    represents an immutable symbolic value. This abstract base class is
+    Represents an immutable symbolic value. This abstract base class is
     inherited by :class:`Constraint`, :class:`Uint` and :class:`Int`.
     """
 
