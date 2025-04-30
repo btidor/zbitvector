@@ -61,10 +61,7 @@ bdist_task:
         image: ghcr.io/cirruslabs/macos-runner:sonoma
       env:
         CIBW_ARCHS: "x86_64"
-        # Workaround for error "ld: branch8 out of range 385198 in
-        # ___gmpn_add_nc_x86_64". See:
-        # https://gmplib.org/list-archives/gmp-bugs/2023-September/005393.html
-        CIBW_BEFORE_ALL: "sudo -E arch -x86_64 -e LDFLAGS='-ld_classic' make ci"
+        CIBW_BEFORE_ALL: "sudo -E arch -x86_64 make ci"
         # Workaround for error "Compatibility with CMake < 3.5 has been removed
         # from CMake".
         CMAKE_POLICY_VERSION_MINIMUM: "3.5"
