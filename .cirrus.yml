@@ -51,9 +51,6 @@ bdist_task:
       env:
         CIBW_ARCHS: "arm64"
         CIBW_BEFORE_ALL: "sudo -E make ci" # -E: pass through env vars
-        # Workaround for error "Compatibility with CMake < 3.5 has been removed
-        # from CMake".
-        CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         PIP_BREAK_SYSTEM_PACKAGES: "1"
       use_compute_credits: true
     - name: "package / macosx-x86-64"
@@ -62,13 +59,10 @@ bdist_task:
       env:
         CIBW_ARCHS: "x86_64"
         CIBW_BEFORE_ALL: "sudo -E arch -x86_64 make ci"
-        # Workaround for error "Compatibility with CMake < 3.5 has been removed
-        # from CMake".
-        CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         PIP_BREAK_SYSTEM_PACKAGES: "1"
   setup_script:
     - git tag -l
-    - python3 -m pip install cibuildwheel==2.21.3
+    - python3 -m pip install cibuildwheel==2.23.3
   build_script:
     - python3 -m cibuildwheel
   wheels_artifacts:

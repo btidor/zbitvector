@@ -2,6 +2,10 @@ DEPDIR = /opt
 INCLUDE = /usr/local/include
 REVISION = 1230d80a5275ddf525da9c218c2bcd29c3130e49
 
+# Workaround for error "Compatibility with CMake < 3.5 has been removed from
+# CMake".
+export CMAKE_POLICY_VERSION_MINIMUM = 3.5
+
 .PHONY: all build clean ci docs release
 
 all: build
