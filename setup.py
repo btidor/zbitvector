@@ -1,4 +1,4 @@
-from setuptools import Extension, setup  # type: ignore
+from setuptools import Extension, setup
 
 CHECKOUT = "/opt/bitwuzla"
 
