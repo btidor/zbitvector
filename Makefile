@@ -49,6 +49,8 @@ $(INCLUDE)/bitwuzla/bitwuzla.h: $(INCLUDE)/gmp.h
 		echo "$(REVISION)" > bitwuzla/.git/HEAD && \
 		rm $(REVISION).zip
 	cd $(DEPDIR)/bitwuzla && \
+		sed -i -e 's/db46e96d1bc26271cf32849592e7db1c702a7bc1/a1bb693253c6d2e7b76bf3871438e875145d41a9/' \
+			contrib/setup-btor2tools.sh && \
 		./contrib/setup-cadical.sh && \
 		./contrib/setup-btor2tools.sh && \
 		./contrib/setup-symfpu.sh && \

@@ -22,6 +22,8 @@ RUN pip install --upgrade cython
 RUN git clone https://github.com/bitwuzla/bitwuzla /opt/bitwuzla
 WORKDIR /opt/bitwuzla
 RUN git checkout 1230d80a5275ddf525da9c218c2bcd29c3130e49
+RUN sed -i -e 's/db46e96d1bc26271cf32849592e7db1c702a7bc1/a1bb693253c6d2e7b76bf3871438e875145d41a9/' \
+    contrib/setup-btor2tools.sh
 RUN ./contrib/setup-cadical.sh
 RUN ./contrib/setup-btor2tools.sh
 RUN ./contrib/setup-symfpu.sh
