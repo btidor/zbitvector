@@ -1,6 +1,6 @@
 # syntax = btidor/syntax
 
-FROM mcr.microsoft.com/vscode/devcontainers/base:0-jammy
+FROM mcr.microsoft.com/devcontainers/base:noble
 COPY *.sources /etc/apt/sources.list.d/
 
 # Bitwula: libgmp
@@ -16,7 +16,7 @@ RUN make -j && make -j check && make install
 # Python
 ADD --apt python3.8 python3.8-dev python3.8-venv python3-pip
 RUN ln -sf /usr/bin/python3.8 /usr/bin/python3
-RUN pip install --upgrade cython pip
+RUN pip install --upgrade cython
 
 # Bitwuzla
 RUN git clone https://github.com/bitwuzla/bitwuzla /opt/bitwuzla

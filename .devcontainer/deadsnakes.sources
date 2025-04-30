@@ -1,6 +1,6 @@
 Types: deb deb-src
 URIs: https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu
-Suites: jammy
+Suites: noble
 Components: main
 Signed-By:
  -----BEGIN PGP PUBLIC KEY BLOCK-----
