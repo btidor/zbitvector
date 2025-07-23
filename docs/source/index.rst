@@ -51,7 +51,7 @@ these operating systems:
 
 * macOS 10.9+
 * Linux with glibc 2.17+ (*manylinux2014*)
-* Linux with musl 1.1+ (*musllinux_1_1*)
+* Linux with musl 1.2+ (*musllinux_1_2*)
 
 zbitvector requires Python 3.8 or later.
 
