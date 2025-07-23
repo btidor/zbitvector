@@ -10,9 +10,10 @@ from typing_extensions import Never, Self
 
 from ._util import ArrayMeta, BitVectorMeta
 
-# pyright: reportUnknownMemberType=false
-# pyright: reportUnknownArgumentType=false
+# pyright: reportIncompatibleMethodOverride=false
 # pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
 
 CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 
@@ -82,14 +83,10 @@ class Symbolic(abc.ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, self._term)}`)"
 
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __eq__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(z3.Z3_mk_eq, self, other)
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __ne__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr_tuple(z3.Z3_mk_distinct, self, other)
 
     def __hash__(self) -> int:
@@ -303,14 +300,10 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
             render = z3.Z3_get_app_arg(CTX, self._term, 0)
         return f"{self.__class__.__name__}(`{z3.Z3_ast_to_string(CTX, render)}`)"
 
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __eq__(self, other: Never, /) -> Never:
         raise TypeError("arrays cannot be compared for equality.")
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __ne__(self, other: Never, /) -> Never:
         raise TypeError("arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:

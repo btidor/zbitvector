@@ -14,6 +14,8 @@ from typing_extensions import Never, Self
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
+# pyright: reportIncompatibleMethodOverride=false
+
 
 class Symbolic(abc.ABC):
     """
@@ -36,9 +38,7 @@ class Symbolic(abc.ABC):
     def __repr__(self) -> str:
         raise NotImplementedError
 
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __eq__(self, other: Self, /) -> Constraint:
         """
         Check if this expression is equal to `other`.
 
@@ -49,9 +49,7 @@ class Symbolic(abc.ABC):
         """
         raise NotImplementedError
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __ne__(self, other: Self, /) -> Constraint:
         """
         Check if this expression is not equal to `other`.
 
@@ -617,7 +615,7 @@ class Array(Generic[K, V]):
     Array[Int8, Int64](`A`)
     """
 
-    __hash__: ClassVar[None] = None  # pyright: ignore[reportIncompatibleMethodOverride]
+    __hash__: ClassVar[None] = None
 
     def __init__(self, value: V | str, /) -> None:
         raise NotImplementedError
@@ -632,14 +630,10 @@ class Array(Generic[K, V]):
         raise NotImplementedError
 
     # Implementation Note: Arrays cannot be compared for equality.
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __eq__(self, other: Never, /) -> Never:
         raise NotImplementedError
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __ne__(self, other: Never, /) -> Never:
         raise NotImplementedError
 
     def __getitem__(self, key: K) -> V:

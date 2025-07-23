@@ -40,6 +40,8 @@ except ImportError:
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
+# pyright: reportIncompatibleMethodOverride=false
+
 BZLA = pybitwuzla.Bitwuzla()
 BZLA.set_option(Option.INCREMENTAL, True)
 BZLA.set_option(Option.PRODUCE_MODELS, True)
@@ -105,14 +107,10 @@ class Symbolic(abc.ABC):
             r = self._term.dump("smt2")
         return f"{self.__class__.__name__}(`{r}`)"
 
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __eq__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.EQUAL, self, other)
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Self, /
-    ) -> Constraint:
+    def __ne__(self, other: Self, /) -> Constraint:
         return Constraint._from_expr(Kind.DISTINCT, self, other)
 
     def __hash__(self) -> int:
@@ -328,14 +326,10 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
             r = self._term.dump("smt2")
         return f"{self.__class__.__name__}(`{r}`)"
 
-    def __eq__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __eq__(self, other: Never, /) -> Never:
         raise TypeError("arrays cannot be compared for equality.")
 
-    def __ne__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, other: Never, /
-    ) -> Never:
+    def __ne__(self, other: Never, /) -> Never:
         raise TypeError("arrays cannot be compared for equality.")
 
     def __getitem__(self, key: K) -> V:
