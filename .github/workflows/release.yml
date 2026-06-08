@@ -3,6 +3,8 @@ on: [workflow_dispatch]
 concurrency:
   group: release
   cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
   release:
@@ -12,9 +14,10 @@ jobs:
       contents: write  # github release assets
       id-token: write  # pypi oidc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: false
       - run: |
           set -eux -o pipefail
           shopt -s failglob
@@ -37,7 +40,6 @@ jobs:
           gh release edit "$RELEASE_TAG" --draft=false
         env:
           GH_TOKEN: ${{ github.token }}
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # v1.14.0
         with:
           packages-dir: wheelhouse/
-          print-hash: true

@@ -3,22 +3,27 @@ on: [push, pull_request, workflow_dispatch]
 concurrency:
   group: documentation
   cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.8'
           cache: 'pip'
-      - run: pip install -r requirements.txt
+          pip-install: -r requirements.txt
       - run: make -C docs html
         env:
           O: -W # fail on warning
           ZBITVECTOR_SOLVER: dummy
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/_build/html
 
@@ -30,5 +35,5 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
         id: deploy-pages

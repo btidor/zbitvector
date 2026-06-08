@@ -1,16 +1,24 @@
 name: typecheck
 on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.8'
           cache: 'pip'
-      - run: pip install -r requirements.txt
+          pip-install: -r requirements.txt
       - run: pyright
         env:
           PYRIGHT_PYTHON_PYLANCE_VERSION: latest-release
