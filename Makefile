@@ -36,9 +36,11 @@ clean:
 
 ci: $(INCLUDE)/bitwuzla/bitwuzla.h
 
+# FYI, gmplib.org blocks GitHub Actions/Azure, so we have to use a mirror...
+
 $(INCLUDE)/gmp.h:
 	-rm -r $(DEPDIR)/gmp-6.3.0
-	curl https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar xJC $(DEPDIR)
+	curl https://misc.btidor.dev/gmp-6.3.0.tar.xz | tar xJC $(DEPDIR)
 	cd $(DEPDIR)/gmp-6.3.0 && \
 		./configure --enable-cxx --enable-fat && \
 		make -j4 && make -j4 check && make install

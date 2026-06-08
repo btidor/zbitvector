@@ -27,7 +27,7 @@ build-backend = "setuptools.build_meta"
 [tool.cibuildwheel]
 enable = ["pypy", "pypy-eol"]
 before-all = ["make ci"]
-test-requires = ["pytest", "setuptools", "z3-solver"]
+test-requires = ["pytest", "setuptools==75.3.4", "z3-solver==4.12.2.0"]
 test-command = """ \
     pytest --import-mode=append {project}/tests && \
     pytest --pyargs --doctest-modules zbitvector && \
@@ -45,11 +45,12 @@ musllinux-aarch64-image = "musllinux_1_2"
 
 [tool.cibuildwheel.macos]
 # Problem: on macOS runners, libgmp is pre-installed through Homebrew (in
-# /opt/homebrew). This version of the library isn't backwards-compatible with
-# older macOS releases, so we always want to use our version (in /usr/local).
-
-# This makes Bitwuzla build against our version of libgmp:
-environment = { CMAKE_PREFIX_PATH = "/usr/local" }
+# /usr/local). This version of the library isn't backwards-compatible with
+# older macOS releases, so we need to remove it:
+before-all = [
+    "brew uninstall --ignore-dependencies gmp",
+    "sudo --preserve-env=MACOSX_DEPLOYMENT_TARGET make ci"
+]
 
 # This makes `delocate` link against our version of the libraries (and prints
 # debugging information). Note that for security reasons, DYLD_LIBRARY_PATH must

@@ -1,0 +1,56 @@
+name: bdist
+on: [push, pull_request, workflow_dispatch]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+
+jobs:
+  bdist:
+    strategy:
+      matrix:
+        include:
+          - variant: manylinux-x86-64
+            runner: ubuntu-26.04
+            archs: 'x86_64'
+            build: '*manylinux*'
+          - variant: musllinux-x86-64
+            runner: ubuntu-26.04
+            archs: 'x86_64'
+            build: '*musllinux*'
+          - variant: manylinux-aarch64
+            runner: ubuntu-26.04-arm
+            archs: 'aarch64'
+            build: '*manylinux*'
+          - variant: musllinux-aarch64
+            runner: ubuntu-26.04-arm
+            archs: 'aarch64'
+            build: '*musllinux*'
+          - variant: macosx-arm64
+            runner: macos-26
+            archs: 'arm64'
+          - variant: macosx-x86-64
+            runner: macos-26-intel
+            archs: 'x86_64'
+    name: ${{ matrix.variant }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+          pip-install: cibuildwheel==3.1.1
+      - run: python3 -m cibuildwheel
+        env:
+          CIBW_ARCHS: ${{ matrix.archs }}
+          CIBW_BUILD: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ github.workflow }}-${{ matrix.variant }}
+          path: wheelhouse/*
+          if-no-files-found: error
