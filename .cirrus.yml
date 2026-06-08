@@ -1,14 +1,3 @@
-sdist_task:
-  name: "package / sdist"
-  container:
-    image: python:latest
-  setup_script:
-    python3 -m pip install build
-  build_script:
-    python3 -m build --sdist --outdir wheelhouse
-  wheels_artifacts:
-    path: "wheelhouse/*"
-
 bdist_task:
   matrix:
     - name: "package / manylinux-x86-64"
