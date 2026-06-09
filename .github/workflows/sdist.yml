@@ -16,7 +16,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.8'
+          python-version: '3.9'
           cache: 'pip'
           pip-install: build
       - run: python3 -m build --sdist --outdir wheelhouse

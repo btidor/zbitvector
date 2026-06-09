@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Dict, Final, Generic, Tuple, TypeVar, Union
+from typing import Any, Callable, Final, Generic, TypeVar, Union
 
 import z3
 from typing_extensions import Never, Self
@@ -20,7 +20,7 @@ CTX = z3.Z3_mk_context(z3.Z3_mk_config())
 N = TypeVar("N", bound=int)
 M = TypeVar("M", bound=int)
 
-CACHE: Dict[str, Tuple[type, Any]] = {}
+CACHE: dict[str, tuple[type, Any]] = {}
 
 
 def _mk_const(instance: Symbolic | Array[K, V], name: str) -> Any:

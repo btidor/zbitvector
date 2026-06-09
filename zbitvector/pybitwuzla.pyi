@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Tuple, overload
+from typing import Any, overload
 
 class Bitwuzla:
     def assert_formula(self, *formula: BitwuzlaTerm) -> None:
@@ -110,7 +110,7 @@ class Bitwuzla:
              For a list of available options see :class:`~pybitwuzla.Option`"""
         ...
 
-    def get_unsat_assumptions(self) -> List[BitwuzlaTerm]:
+    def get_unsat_assumptions(self) -> list[BitwuzlaTerm]:
         """Return list of unsatisfiable assumptions previously added via
         :func:`~pybitwuzla.Bitwuzla.assume_formula`.
 
@@ -121,7 +121,7 @@ class Bitwuzla:
         :rtype:   list(BitwuzlaTerm)"""
         ...
 
-    def get_unsat_core(self) -> List[BitwuzlaTerm]:
+    def get_unsat_core(self) -> list[BitwuzlaTerm]:
         """Return list of unsatisfiable assertions previously added via
         :func:`~pybitwuzla.Bitwuzla.assert_formula`.
 
@@ -169,7 +169,7 @@ class Bitwuzla:
         :rtype: str"""
         ...
 
-    def is_unsat_assumption(self, *assumption: BitwuzlaTerm) -> List[bool]:
+    def is_unsat_assumption(self, *assumption: BitwuzlaTerm) -> list[bool]:
         """is_unsat_assumption(assumption,...)
 
         Determine if any of the given assumptions are false assumptions.
@@ -441,7 +441,7 @@ class Bitwuzla:
         :rtype: BitwuzlaTerm"""
         ...
 
-    def mk_fun_sort(self, domain: List[Any], codomain: BitwuzlaSort) -> BitwuzlaSort:
+    def mk_fun_sort(self, domain: list[Any], codomain: BitwuzlaSort) -> BitwuzlaSort:
         """mk_fun_sort(domain, codomain)
 
         Create function sort with given domain and codomain.
@@ -479,8 +479,8 @@ class Bitwuzla:
     def mk_term(
         self,
         kind: Kind,
-        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
-        indices: List[int] | Tuple[int, ...] | None = None,
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...],
+        indices: list[int] | tuple[int, ...] | None = None,
     ) -> BitwuzlaTerm:
         """mk_term(kind, terms, indices = None)
 
@@ -590,20 +590,20 @@ class Bitwuzla:
     @overload
     def substitute(
         self,
-        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
-        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
-    ) -> List[BitwuzlaTerm]: ...
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...],
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> list[BitwuzlaTerm]: ...
     @overload
     def substitute(
         self,
         terms: BitwuzlaTerm,
-        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
     ) -> BitwuzlaTerm: ...
     def substitute(
         self,
-        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...] | BitwuzlaTerm,
-        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
-    ) -> List[BitwuzlaTerm] | BitwuzlaTerm:
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...] | BitwuzlaTerm,
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> list[BitwuzlaTerm] | BitwuzlaTerm:
         """substitute(terms, subst_map)
 
         Substitute constants or variables in ``terms`` by applying
@@ -676,7 +676,7 @@ class BitwuzlaSort:
         :rtype: BitwuzlaSort"""
         ...
 
-    def fun_get_domain_sorts(self) -> List[BitwuzlaSort]:
+    def fun_get_domain_sorts(self) -> list[BitwuzlaSort]:
         """Get domain sorts of function sort.
 
         :return: Domain sorts.
@@ -721,12 +721,12 @@ class BitwuzlaTerm:
         :rtype: str"""
         ...
 
-    def get_children(self) -> List[BitwuzlaTerm]:
+    def get_children(self) -> list[BitwuzlaTerm]:
         """:return: The children of the term.
         :rtype: list(BitwuzlaTerm)"""
         ...
 
-    def get_indices(self) -> List[int]:
+    def get_indices(self) -> list[int]:
         """:return: Indices of indexed operator.
         :rtype: list(int)"""
         ...

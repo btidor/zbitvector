@@ -14,8 +14,8 @@ RUN ./configure --enable-cxx --enable-fat
 RUN make -j && make -j check && make install
 
 # Python
-ADD --apt python3.8 python3.8-dev python3.8-venv python3-pip
-RUN ln -sf /usr/bin/python3.8 /usr/bin/python3
+ADD --apt python3.9 python3.9-dev python3.9-venv python3-pip
+RUN ln -sf /usr/bin/python3.9 /usr/bin/python3
 RUN pip install --upgrade cython
 
 # Bitwuzla

@@ -53,7 +53,7 @@ these operating systems:
 * Linux with glibc 2.17+ (*manylinux2014*)
 * Linux with musl 1.2+ (*musllinux_1_2*)
 
-zbitvector requires Python 3.8 or later.
+zbitvector requires Python 3.9 or later.
 
 To build from source, first `build Bitwuzla`_ using :code:`./configure --shared`
 and install the library by running :code:`make install`.

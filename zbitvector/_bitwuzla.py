@@ -7,11 +7,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Final,
     Generic,
-    List,
-    Tuple,
     TypeVar,
     Union,
 )
@@ -54,7 +51,7 @@ BZLA.set_option(Option.OUTPUT_NUMBER_FORMAT, "hex")
 last_check: Solver | bool = False
 
 
-CACHE: Dict[str, Tuple[type, BitwuzlaTerm]] = {}
+CACHE: dict[str, tuple[type, BitwuzlaTerm]] = {}
 
 
 def _mk_const(instance: Symbolic | Array[K, V], name: str) -> BitwuzlaTerm:
@@ -348,7 +345,7 @@ class Solver:
     __slots__ = ("_assertions", "_current")
 
     def __init__(self) -> None:
-        self._assertions: List[Constraint] = []
+        self._assertions: list[Constraint] = []
         self._current = False
 
     def add(self, assertion: Constraint, /) -> None:

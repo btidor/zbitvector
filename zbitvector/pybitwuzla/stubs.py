@@ -15,9 +15,6 @@ def munge(expr: str, spec: inspect.FullArgSpec) -> str:
     expr = re.sub(r"(list|tuple|dict)([^(])", r"\1[Any]\2", expr)
     expr = re.sub(r"(list|tuple|dict)\(([^)]+)\)", r"\1[\2]", expr)
     expr = expr.replace(" or ", " | ")
-    expr = expr.replace("dict", "Dict")
-    expr = expr.replace("list", "List")
-    expr = expr.replace("tuple", "Tuple")
     expr = expr.replace("uint32_t", "int")
     expr = expr.replace("pybitwuzla.", "")
     expr = expr.replace("BitwuzlaOption", "Option")
@@ -30,20 +27,20 @@ def munge(expr: str, spec: inspect.FullArgSpec) -> str:
 print("from __future__ import annotations")
 print()
 print("from enum import Enum")
-print("from typing import Any, Dict, List, Tuple, overload")
+print("from typing import Any, overload")
 print()
 
 SUBSTITUTE_OVERLOADS = """    @overload
     def substitute(
         self,
-        terms: List[BitwuzlaTerm] | Tuple[BitwuzlaTerm, ...],
-        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
-    ) -> List[BitwuzlaTerm]: ...
+        terms: list[BitwuzlaTerm] | tuple[BitwuzlaTerm, ...],
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
+    ) -> list[BitwuzlaTerm]: ...
     @overload
     def substitute(
         self,
         terms: BitwuzlaTerm,
-        subst_map: Dict[BitwuzlaTerm, BitwuzlaTerm],
+        subst_map: dict[BitwuzlaTerm, BitwuzlaTerm],
     ) -> BitwuzlaTerm: ...
 """
 

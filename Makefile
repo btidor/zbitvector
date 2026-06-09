@@ -12,7 +12,7 @@ all: build
 
 build: clean
 	python3 -m build
-	auditwheel repair --plat linux_x86_64 dist/*.whl -w dist/
+	auditwheel repair --plat auto dist/*.whl -w dist/
 
 docs:
 	make -C docs clean

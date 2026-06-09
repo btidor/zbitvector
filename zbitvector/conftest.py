@@ -1,6 +1,6 @@
 """Configuration for pytest. *Not* part of the public API."""
 
-from typing import Any, Dict, Literal
+from typing import Any, Literal
 
 import pytest
 from typing_extensions import TypeAlias
@@ -19,7 +19,7 @@ collect_ignore = ["_z3.py"]
 
 
 @pytest.fixture(autouse=True)
-def setup_doctest(doctest_namespace: Dict[str, Any]) -> None:
+def setup_doctest(doctest_namespace: dict[str, Any]) -> None:
     doctest_namespace.update(
         {
             "Array": Array,
