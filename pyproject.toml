@@ -25,6 +25,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
+enable = ["pypy", "pypy-eol"]
 before-all = ["make ci"]
 test-requires = ["pytest", "setuptools", "z3-solver"]
 test-command = """ \
