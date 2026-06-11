@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Final, Generic, TypeVar, Union
+from typing import Any, Callable, Final, Generic, TypeVar
 
 import z3
 from typing_extensions import Never, Self
@@ -98,10 +98,11 @@ class Constraint(Symbolic):
     __slots__ = ()
 
     def __init__(self, value: bool | str, /):
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case bool():
+                term = z3.Z3_mk_true(CTX) if value else z3.Z3_mk_false(CTX)
         Symbolic.__init__(self, term)
 
     def __invert__(self) -> Self:
@@ -123,13 +124,13 @@ class Constraint(Symbolic):
         return then._from_expr(z3.Z3_mk_ite, self, then, else_)
 
     def reveal(self) -> bool | None:
-        kind = z3.Z3_get_decl_kind(CTX, z3.Z3_get_app_decl(CTX, self._term))
-        if kind == z3.Z3_OP_TRUE:
-            return True
-        elif kind == z3.Z3_OP_FALSE:
-            return False
-        else:
-            return None
+        match z3.Z3_get_decl_kind(CTX, z3.Z3_get_app_decl(CTX, self._term)):
+            case z3.Z3_OP_TRUE:
+                return True
+            case z3.Z3_OP_FALSE:
+                return False
+            case _:
+                return None
 
 
 class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
@@ -138,10 +139,11 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            term = z3.Z3_mk_numeral(CTX, str(value), self._sort)
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case int():
+                term = z3.Z3_mk_numeral(CTX, str(value), self._sort)
         Symbolic.__init__(self, term)
 
     @classmethod
@@ -263,8 +265,8 @@ class Int(BitVector[N]):
         return r - (1 << self.width)
 
 
-K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
-V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+K = TypeVar("K", bound=Uint[Any] | Int[Any])
+V = TypeVar("V", bound=Uint[Any] | Int[Any])
 
 
 class Array(Generic[K, V], metaclass=ArrayMeta):
@@ -274,11 +276,12 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
     __slots__ = ("_term",)
 
     def __init__(self, value: V | str, /) -> None:
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            self._sort  # for error message consistency
-            term = z3.Z3_mk_const_array(CTX, self._key._sort, value._term)  # pyright: ignore[reportPrivateUsage]
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case _:
+                self._sort  # for error message consistency
+                term = z3.Z3_mk_const_array(CTX, self._key._sort, value._term)  # pyright: ignore[reportPrivateUsage]
         self._term = term
 
     @classmethod
@@ -350,15 +353,15 @@ class Solver:
         arr = (z3.Ast * len(assumptions))(
             *(a._term for a in assumptions)  # pyright: ignore[reportPrivateUsage]
         )
-        r = z3.Z3_solver_check_assumptions(CTX, self._solver, len(assumptions), arr)
-        if r == z3.Z3_L_TRUE:
-            self._set_model(z3.Z3_solver_get_model(CTX, self._solver))
-            return True
-        elif r == z3.Z3_L_FALSE:
-            return False
-        else:
-            reason = z3.Z3_solver_get_reason_unknown(CTX, self._solver)
-            raise RuntimeError(f"Z3 could not solve this instance: {reason}")
+        match z3.Z3_solver_check_assumptions(CTX, self._solver, len(assumptions), arr):
+            case z3.Z3_L_TRUE:
+                self._set_model(z3.Z3_solver_get_model(CTX, self._solver))
+                return True
+            case z3.Z3_L_FALSE:
+                return False
+            case _:
+                reason = z3.Z3_solver_get_reason_unknown(CTX, self._solver)
+                raise RuntimeError(f"Z3 could not solve this instance: {reason}")
 
     def evaluate(self, bv: BitVector[N], /) -> int:
         if self._model is None:

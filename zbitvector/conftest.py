@@ -1,9 +1,8 @@
 """Configuration for pytest. *Not* part of the public API."""
 
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 import pytest
-from typing_extensions import TypeAlias
 
 from . import Array, Constraint, Int, Solver, Uint
 

@@ -13,16 +13,15 @@ except metadata.PackageNotFoundError:
 __all__ = ("Array", "BitVector", "Constraint", "Int", "Solver", "Symbolic", "Uint")
 
 
-_solver = os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower()
-
-if _solver == "dummy":
-    from . import _abstract as _backend
-elif _solver == "bitwuzla":
-    from . import _bitwuzla as _backend
-elif _solver == "z3":
-    from . import _z3 as _backend
-else:
-    raise ValueError(f"unknown solver: {_solver}")
+match os.getenv("ZBITVECTOR_SOLVER", "bitwuzla").lower():
+    case "dummy":
+        from . import _abstract as _backend
+    case "bitwuzla":
+        from . import _bitwuzla as _backend
+    case "z3":
+        from . import _z3 as _backend
+    case other:
+        raise ValueError(f"unknown solver: {other}")
 
 if TYPE_CHECKING:
     # Make imports explicit for the type checker.

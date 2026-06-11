@@ -79,7 +79,7 @@ class ArrayMeta(abc.ABCMeta):
                 return self
 
             if isinstance(a, BitVectorMeta):
-                # Partially-specified BitVector, e.g. Int[Union[...]]; handle
+                # Partially-specified BitVector, e.g. Int[... | ...]; handle
                 # the same as above.
                 return self
 

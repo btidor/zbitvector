@@ -1,7 +1,6 @@
-from typing import Literal
+from typing import Literal, TypeAlias
 
 from pympler.asizeof import asizeof  # type: ignore
-from typing_extensions import TypeAlias
 
 from zbitvector import Constraint, Int, Uint
 

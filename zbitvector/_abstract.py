@@ -7,7 +7,7 @@ For specific implementations, see _bitwuzla.py and _z3.py.
 from __future__ import annotations
 
 import abc
-from typing import Any, ClassVar, Final, Generic, TypeVar, Union, overload
+from typing import Any, ClassVar, Final, Generic, TypeVar, overload
 
 from typing_extensions import Never, Self
 
@@ -590,8 +590,8 @@ class Int(BitVector[N]):
         raise NotImplementedError
 
 
-K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
-V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+K = TypeVar("K", bound=Uint[Any] | Int[Any])
+V = TypeVar("V", bound=Uint[Any] | Int[Any])
 
 
 class Array(Generic[K, V]):

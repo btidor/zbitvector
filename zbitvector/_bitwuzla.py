@@ -10,7 +10,6 @@ from typing import (
     Final,
     Generic,
     TypeVar,
-    Union,
 )
 
 from typing_extensions import Never, Self
@@ -128,10 +127,11 @@ class Constraint(Symbolic):
     __slots__ = ()
 
     def __init__(self, value: bool | str, /):
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            term = BZLA.mk_bv_value(self._sort, int(value))
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case bool():
+                term = BZLA.mk_bv_value(self._sort, int(value))
         super().__init__(term)
 
     def _evaluate(self) -> bool:
@@ -162,10 +162,11 @@ class BitVector(Symbolic, Generic[N], metaclass=BitVectorMeta):
     __slots__ = ()
 
     def __init__(self, value: int | str, /) -> None:
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            term = BZLA.mk_bv_value(self._sort, value)
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case int():
+                term = BZLA.mk_bv_value(self._sort, value)
         super().__init__(term)
 
     @classmethod
@@ -285,8 +286,8 @@ class Int(BitVector[N]):
         return result
 
 
-K = TypeVar("K", bound=Union[Uint[Any], Int[Any]])
-V = TypeVar("V", bound=Union[Uint[Any], Int[Any]])
+K = TypeVar("K", bound=Uint[Any] | Int[Any])
+V = TypeVar("V", bound=Uint[Any] | Int[Any])
 
 
 class Array(Generic[K, V], metaclass=ArrayMeta):
@@ -296,10 +297,11 @@ class Array(Generic[K, V], metaclass=ArrayMeta):
     __slots__ = ("_term",)
 
     def __init__(self, value: V | str, /) -> None:
-        if isinstance(value, str):
-            term = _mk_const(self, value)
-        else:
-            term = BZLA.mk_const_array(self._sort, value._term)  # pyright: ignore[reportPrivateUsage]
+        match value:
+            case str():
+                term = _mk_const(self, value)
+            case _:
+                term = BZLA.mk_const_array(self._sort, value._term)  # pyright: ignore[reportPrivateUsage]
         self._term: BitwuzlaTerm = term
 
     @classmethod
@@ -365,14 +367,14 @@ class Solver:
         for c in assumptions:
             BZLA.assume_formula(c._term)  # pyright: ignore[reportPrivateUsage]
 
-        r = BZLA.check_sat()
-        if r == Result.SAT:
-            self._current, last_check = True, self
-            return True
-        elif r == Result.UNSAT:
-            return False
-        else:
-            raise RuntimeError("Bitwuzla could not solve this instance")
+        match BZLA.check_sat():
+            case Result.SAT:
+                self._current, last_check = True, self
+                return True
+            case Result.UNSAT:
+                return False
+            case _:
+                raise RuntimeError("Bitwuzla could not solve this instance")
 
     def evaluate(self, bv: BitVector[N], /) -> int:
         global last_check

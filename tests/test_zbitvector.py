@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Hashable
-from typing import Any, Literal, TypeVar, Union
+from typing import Any, Literal, TypeVar
 
 import pytest
 
@@ -13,7 +13,7 @@ def test_bitvector_validations():
     with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Int(123)
 
-    IntA = Int[Union[Literal[32], Literal[64]]]  # ok
+    IntA = Int[Literal[32] | Literal[64]]  # ok
     with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         IntA(123)
 
@@ -42,7 +42,7 @@ def test_array_validations():
     with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Array("A")
 
-    IntA = Int[Union[Literal[32], Literal[64]]]
+    IntA = Int[Literal[32] | Literal[64]]
     Array[IntA, IntA]  # ok
     with pytest.raises(AttributeError, match="has no attribute '_sort'"):
         Array[IntA, IntA]("A")
