@@ -27,7 +27,10 @@ build-backend = "setuptools.build_meta"
 [tool.cibuildwheel]
 enable = ["pypy", "pypy-eol"]
 before-all = ["make ci"]
-test-requires = ["pytest", "setuptools==75.3.4", "z3-solver==4.12.2.0"]
+# We pin a specific version of z3-solver because they regularly publish releases
+# with missing or mis-tagged wheels; note that the manylinux version must be old
+# enough to run on the build image
+test-requires = ["pytest", "z3-solver==4.15.4.0"]
 test-command = """ \
     pytest --import-mode=append {project}/tests && \
     pytest --pyargs --doctest-modules zbitvector && \
