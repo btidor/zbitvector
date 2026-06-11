@@ -42,9 +42,9 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          python-version: '3.14'  # cibuildwheel needs a recent Python version
           cache: 'pip'
-          pip-install: cibuildwheel==3.1.1  # requires a recent Python version
+          pip-install: cibuildwheel~=4.0.0
       - run: python3 -m cibuildwheel
         env:
           CIBW_ARCHS: ${{ matrix.archs }}
