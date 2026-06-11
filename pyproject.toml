@@ -35,10 +35,10 @@ test-command = """ \
     ZBITVECTOR_SOLVER=z3 pytest --pyargs --doctest-modules zbitvector
 """
 
-manylinux-x86_64-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
-manylinux-pypy_x86_64-image = "manylinux2014"
-manylinux-pypy_aarch64-image = "manylinux2014"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+manylinux-pypy_x86_64-image = "manylinux_2_28"
+manylinux-pypy_aarch64-image = "manylinux_2_28"
 
 musllinux-x86_64-image = "musllinux_1_2"
 musllinux-aarch64-image = "musllinux_1_2"
@@ -56,10 +56,17 @@ before-all = [
 # debugging information). Note that for security reasons, DYLD_LIBRARY_PATH must
 # be explicitly set per-call:
 # https://github.com/pypa/cibuildwheel/issues/816#issuecomment-916197079
-repair-wheel-command = """ \
-    DYLD_LIBRARY_PATH=/usr/local/lib delocate-listdeps {wheel} && \
-    DYLD_LIBRARY_PATH=/usr/local/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-"""
+repair-wheel-command = "DYLD_LIBRARY_PATH=/usr/local/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+# While we build on a manylinux_2_28 image, the resulting wheel is backwards-
+# compatible with manylinux_2_24
+[[tool.cibuildwheel.overrides]]
+select = "*manylinux_x86_64*"
+repair-wheel-command = "auditwheel repair --plat manylinux_2_24_x86_64 --only-plat -w {dest_dir} {wheel}"
+
+[[tool.cibuildwheel.overrides]]
+select = "*manylinux_aarch64*"
+repair-wheel-command = "auditwheel repair --plat manylinux_2_24_aarch64 --only-plat -w {dest_dir} {wheel}"
 
 # Z3 doesn't distribute pre-built binaries for these platforms
 [[tool.cibuildwheel.overrides]]

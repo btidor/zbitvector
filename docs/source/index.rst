@@ -50,7 +50,7 @@ Wheels are built for the x86-64 and AArch64 architectures and support
 these operating systems:
 
 * macOS 10.9+
-* Linux with glibc 2.17+ (*manylinux2014*)
+* Linux with glibc 2.24+ (*manylinux_2_24*)
 * Linux with musl 1.2+ (*musllinux_1_2*)
 
 zbitvector requires Python 3.9 or later.
