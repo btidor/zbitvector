@@ -26,10 +26,11 @@ release:
 		([[ $${REPLY^^} == "Y" ]] || exit 2)'
 	git tag -s "v$V" -m "zbitvector@v$V"
 	git push origin "v$V"
-	@echo "\n1. Draft release:\n   https://github.com/btidor/zbitvector/releases/tag/v$V"
-	@echo "\n2. Wait for build:\n   https://cirrus-ci.com/github/btidor/zbitvector/v$V"
-	@echo "\n3. Check artifacts:\n   https://api.cirrus-ci.com/v1/artifact/build/NNNNNN/wheels.zip"
-	@echo "\n4. Finalize release:\n   https://github.com/btidor/zbitvector/actions/workflows/release.yml"
+	@echo "\n1. Wait for build"
+	@echo "2. Check artifacts"
+	@echo "3. Approve workflow"
+	@echo "4. Publish draft release"
+	@echo "\n  https://github.com/btidor/zbitvector/actions/workflows/build.yml\n"
 
 clean:
 	-rm -r dist/ *.egg-info/
