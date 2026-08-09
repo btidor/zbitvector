@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: '3.14'  # cibuildwheel needs a recent Python version
           cache: 'pip'
-          pip-install: cibuildwheel~=4.0.0
+          pip-install: cibuildwheel~=4.2.0
       - run: python3 -m cibuildwheel
         env:
           CIBW_ARCHS: ${{ matrix.archs }}
