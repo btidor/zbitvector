@@ -1,6 +1,6 @@
 # syntax = btidor/syntax
 
-FROM mcr.microsoft.com/devcontainers/base:noble
+FROM mcr.microsoft.com/devcontainers/base:resolute
 COPY *.sources /etc/apt/sources.list.d/
 
 # Bitwula: libgmp
@@ -10,7 +10,7 @@ ADD --checksum=sha256:a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43
 RUN tar xJf /opt/gmp-*.tar.xz -C /opt && rm /opt/gmp-*.tar.xz
 
 WORKDIR /opt/gmp-6.3.0
-RUN ./configure --enable-cxx --enable-fat
+RUN ./configure --enable-cxx --enable-fat CFLAGS='-std=c17'
 RUN make -j && make -j check && make install
 
 # Python
@@ -24,6 +24,7 @@ WORKDIR /opt/bitwuzla
 RUN git checkout 1230d80a5275ddf525da9c218c2bcd29c3130e49
 RUN sed -i -e 's/db46e96d1bc26271cf32849592e7db1c702a7bc1/a1bb693253c6d2e7b76bf3871438e875145d41a9/' \
     contrib/setup-btor2tools.sh
+ENV CMAKE_POLICY_VERSION_MINIMUM=3.5
 RUN ./contrib/setup-cadical.sh
 RUN ./contrib/setup-btor2tools.sh
 RUN ./contrib/setup-symfpu.sh
